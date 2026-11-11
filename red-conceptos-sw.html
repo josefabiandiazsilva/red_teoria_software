@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red de conceptos · Guía de proyectos de software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0f172a;--mut:#64748b;--line:#e2e8f0;--soft:#f8fafc;--acc:#E50914;--mono:'IBM Plex Mono',ui-monospace,monospace;--sans:'IBM Plex Sans',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#fff;color:var(--ink);font-family:var(--sans);overflow:hidden}
+#stage{position:fixed;inset:0}#stage canvas{display:block}
+#labels{position:fixed;inset:0;pointer-events:none}
+header{position:fixed;top:0;left:0;right:0;height:58px;display:flex;align-items:center;gap:18px;padding:0 18px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.9);backdrop-filter:blur(8px);z-index:6}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand .tag{font:600 11px var(--mono);letter-spacing:.08em;background:var(--ink);color:#fff;padding:5px 8px;border-radius:4px;white-space:nowrap}
+.brand h1{font:600 15px var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{display:block;font:400 11px var(--mono);color:var(--mut);white-space:nowrap}
+.stats{margin-left:auto;display:flex;gap:20px}
+.stat{text-align:right}.stat b{display:block;font:600 19px var(--mono);line-height:1}.stat span{font:500 9px var(--mono);letter-spacing:.1em;color:var(--mut);text-transform:uppercase}
+#crumbs{position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:4px;background:#0f172a;color:#fff;border-radius:999px;padding:5px 6px 5px 10px;box-shadow:0 6px 20px rgba(15,23,42,.18);max-width:calc(100% - 560px);overflow:hidden}
+#crumbs.on{display:flex}
+#crumbs button{background:none;border:0;color:#cbd5e1;font:500 12px var(--mono);cursor:pointer;padding:3px 6px;border-radius:999px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+#crumbs button:hover{color:#fff}#crumbs button.cur{color:#fff;font-weight:600}
+#crumbs span{color:#64748b}
+#crumbs .out{background:#fff;color:#0f172a;margin-left:8px;padding:3px 10px}
+.panel{position:fixed;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(15,23,42,.06);z-index:4}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line);font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);position:sticky;top:0;background:#fff;z-index:2}
+#legend{top:72px;left:14px;width:244px;max-height:calc(100% - 150px);overflow:auto}
+.lg{padding:8px 12px 10px;border-bottom:1px dashed var(--line)}.lg:last-child{border-bottom:0}
+.lg h4{font:600 10px var(--mono);letter-spacing:.08em;color:var(--mut);margin:2px 0 6px;text-transform:uppercase}
+.row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12.5px;cursor:pointer;user-select:none}
+.row input{accent-color:var(--ink)}.row .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.row .sh{width:12px;height:12px;flex:none;display:grid;place-items:center;font-size:11px}
+.row em{margin-left:auto;font:500 11px var(--mono);color:var(--mut);font-style:normal}
+.mini{border:1px solid var(--line);background:#fff;border-radius:4px;font-size:11px;padding:0 4px;cursor:pointer;color:var(--mut)}.mini:hover{color:var(--ink);border-color:#94a3b8}
+.lnk{display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0}
+.lnk i{display:inline-block;width:26px;height:0;border-top:2px solid #475569}.lnk i.d{border-top:2px dashed #94a3b8}.lnk i.p{border-top:2px solid var(--acc)}
+#search{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;font:400 12.5px var(--sans);background:#fff}
+#search:focus{outline:2px solid #0f172a22;border-color:#94a3b8}
+.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button,.btn{font:500 12px var(--mono);border:0;background:#fff;padding:7px 10px;cursor:pointer;color:var(--ink);white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}.seg button.on{background:var(--ink);color:#fff}
+#lvl{width:100%}#lvl button{flex:1;padding:5px 2px;font-size:10.5px}
+.btn{border:1px solid var(--line);border-radius:7px}.btn:hover,.seg button:not(.on):hover{background:var(--soft)}
+.btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.star{background:#E50914;color:#fff;border-color:#E50914;font-weight:600}.btn.star.on{background:#9b0610;border-color:#9b0610}
+/* detalle */
+#detail{top:72px;right:14px;width:380px;max-height:calc(100% - 150px);overflow:auto;display:none}#detail.on{display:block}
+.dt{padding:14px 16px 18px}
+.kick{font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;margin:-2px 0 8px}
+.dt h2{font:700 20px/1.25 var(--sans);margin:2px 0 8px}
+.dt p{font-size:13.5px;line-height:1.55;color:#334155}
+.dt p.ctx{margin-top:8px;background:var(--soft);border-radius:6px;padding:8px 10px;font-size:13px}
+.dt p.obj{font-size:14px;color:#0f172a}
+.path{font:500 11px var(--mono);color:var(--mut);margin-bottom:6px}.path a{cursor:pointer;color:var(--mut)}.path a:hover{color:var(--ink);text-decoration:underline}
+blockquote{margin:12px 0 4px;padding:10px 12px;border-left:3px solid;background:#fafafa;border-radius:0 6px 6px 0;font:italic 500 14.5px/1.45 var(--sans);color:#0f172a}
+blockquote small{display:block;font:500 9.5px var(--mono);font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-top:6px}
+.sec{margin-top:14px}
+.sec h5{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+.dt ul{list-style:none;font-size:13px;line-height:1.45;color:#1e293b}
+.dt li{position:relative;padding:3px 0 3px 20px}
+.dt li::before{position:absolute;left:2px;top:3px;font-size:12px}
+.li-i li::before{content:'•';color:#64748b;font-size:15px;top:1px}
+.li-r li::before{content:'✓';color:#2E9E5B;font-weight:700}
+.li-x li::before{content:'⚠';color:#D97706}
+.li-q li::before{content:'?';color:#2B6CB0;font-weight:700;font-family:var(--mono)}
+.acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.act{font:600 12px var(--mono);border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 10px;cursor:pointer;color:var(--ink)}
+.act:hover{background:var(--soft)}.act.pri{background:var(--ink);color:#fff;border-color:var(--ink)}.act:disabled{opacity:.35;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.chip{font:500 11px var(--mono);border:1px solid var(--line);border-radius:999px;padding:3px 8px;background:#fff;cursor:pointer;color:var(--ink)}
+.chip:hover{border-color:#94a3b8}.chip.g{border-color:#fecaca;color:#b91c1c;background:#fff5f5}.chip.static{cursor:default}
+.cn{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;line-height:1.35}
+.cn:hover{background:var(--soft)}.cn .dot{width:9px;height:9px;border-radius:50%;margin-top:4px;flex:none}
+.cn small{display:block;color:var(--mut);font-size:11.5px;margin-top:1px}
+.cn .cnt{font:600 10px var(--mono);color:var(--mut);font-style:normal}
+.cn.rec{border:1px solid var(--line);margin-bottom:5px}.cn.rec small{color:#334155;font-size:12px}
+.ev{font:600 9px var(--mono);padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:1px}
+.ev.doc{background:#0f172a;color:#fff}.ev.conc{background:#e2e8f0;color:#334155}
+.ref{display:block;font-size:12px;line-height:1.4;padding:5px 0;color:#1d4ed8;text-decoration:none;border-bottom:1px dotted var(--line)}
+.ref:hover{text-decoration:underline}.ref.nolink{color:#334155}
+.x{border:0;background:none;font-size:18px;cursor:pointer;color:var(--mut);line-height:1}
+.back{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fff5f5;color:#b91c1c;font:600 11.5px var(--mono);padding:8px 14px;cursor:pointer}
+.steps{display:flex;gap:4px;padding:10px 14px 0;flex-wrap:wrap}
+.steps button{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;font:600 11px var(--mono);cursor:pointer}
+.steps button.on{background:#E50914;border-color:#E50914;color:#fff}
+.gnav{display:flex;justify-content:space-between;margin-top:18px}
+.hop{margin:0 0 0 12px;padding:2px 0 2px 14px;border-left:2px solid #E50914;font:500 11px var(--mono);color:#64748b}.hop a{color:#1d4ed8}
+/* barra */
+#bar{left:0;right:0;margin:0 auto;width:max-content;max-width:calc(100% - 28px);bottom:14px;display:flex;align-items:center;gap:8px;padding:8px 10px;flex-wrap:wrap;justify-content:center}
+select{font:400 12px var(--sans);padding:6px;border:1px solid var(--line);border-radius:6px;max-width:150px;background:#fff}
+.sep{width:1px;height:24px;background:var(--line)}
+.lab{font:600 10px var(--mono);letter-spacing:.08em;color:var(--mut);text-transform:uppercase}
+/* etiquetas */
+.lbl{pointer-events:none;transition:opacity .2s;padding-bottom:7px}
+.lbl>span{display:inline-block;font:500 11px var(--sans);color:#1e293b;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 6px #fff}
+.lbl.autor{padding-bottom:22px}.lbl.precursor{padding-bottom:14px}.lbl.eje{padding-bottom:13px}.lbl.caso{padding-bottom:10px}.lbl.obra{padding-bottom:10px}.lbl.elemento{padding-bottom:4px}
+.lbl.autor>span{font:700 13px var(--mono);padding:3px 8px;border-radius:5px;color:#fff;text-shadow:none;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.lbl.eje>span{font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#111;background:#fff;border:1px solid #111;padding:2px 6px;border-radius:3px;text-shadow:none}
+.lbl.caso>span{font:600 10.5px var(--mono);color:#fff;padding:2px 6px;border-radius:3px;text-shadow:none}
+.lbl.obra>span{font-style:italic;font-weight:600;color:#334155}
+.lbl.precursor>span{font:600 11px var(--mono);color:#475569}
+.lbl.elemento>span{font-size:10.5px;color:#475569}
+.lbl.dim{opacity:.15}.lbl.hot>span{font-weight:700}.lbl.ext>span{opacity:.7;font-style:italic}
+#tip{position:fixed;pointer-events:none;background:#0f172a;color:#fff;font:500 12px var(--sans);padding:6px 9px;border-radius:6px;z-index:9;display:none;max-width:300px;line-height:1.35}
+#tip small{display:block;color:#cbd5e1;font:400 11px var(--mono)}#tip em{display:block;color:#fca5a5;font:500 10.5px var(--mono);font-style:normal;margin-top:3px}
+#modal{position:fixed;inset:0;background:rgba(15,23,42,.25);display:none;place-items:center;z-index:20}#modal.on{display:grid}
+#modal .box{background:#fff;border-radius:12px;width:min(760px,94vw);max-height:84vh;overflow:auto;padding:22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+#modal h3{font:700 18px var(--sans);margin-bottom:4px}.mnote{font-size:13px;color:#64748b;margin-bottom:10px;line-height:1.5}
+#modal .ri{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.45}
+#modal .ri a{color:#1d4ed8;text-decoration:none}
+#modal .ri b{font:600 11px var(--mono);color:var(--mut);min-width:26px}#modal .ri small{display:block;color:var(--mut);font-size:11.5px}
+.help h4{font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px;color:#334155}
+.help li{font-size:13.5px;line-height:1.5;margin:3px 0 3px 18px}
+#legendToggle{display:none}
+@media (max-width:1250px){.stats .stat:nth-child(n+5){display:none}}
+@media (max-width:900px){
+ .stats{display:none}#legend{display:none;width:calc(100% - 28px)}#legend.on{display:block}#legendToggle{display:inline-block}
+ #detail{left:14px;right:14px;width:auto;top:auto;bottom:130px;max-height:48%}
+ #bar{width:auto;left:14px;right:14px}#crumbs{max-width:calc(100% - 28px)}
+}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<div id="stage"></div><div id="labels"></div>
+<header>
+ <div class="brand"><span class="tag">PERFIL SW · RED</span>
+  <div><h1>Guía en red de proyectos de software</h1><small>PMBOK 8 · Pressman · Sommerville · Boehm · McConnell · Cohn</small></div></div>
+ <div class="stats" id="stats"></div>
+</header>
+<nav id="crumbs"></nav>
+<aside class="panel" id="legend">
+ <div class="ph">Mapa · filtros <span id="nvis"></span></div>
+ <div class="lg"><input id="search" list="nodelist" placeholder="Buscar en 400+ nodos…"><datalist id="nodelist"></datalist></div>
+ <div class="lg"><h4>Nivel de detalle</h4><div class="seg" id="lvl"><button data-l="1">1 Obras</button><button data-l="2" class="on">2 Conceptos</button><button data-l="3">3 Todo</button></div></div>
+ <div class="lg"><h4>Autores <span style="font-weight:400;text-transform:none;letter-spacing:0">· ◎ = entrar</span></h4><div id="lgAut"></div></div>
+ <div class="lg"><h4>Tipos de nodo</h4><div id="lgType"></div></div>
+ <div class="lg"><h4>Enlaces</h4>
+  <label class="row"><input type="checkbox" id="fDoc" checked><span class="lnk"><i></i>Documentado (fuente)</span></label>
+  <label class="row"><input type="checkbox" id="fConc" checked><span class="lnk"><i class="d"></i>Conceptual (interpretación)</span></label>
+  <label class="row"><input type="checkbox" id="fEje"><span class="lnk"><i style="border-color:#cbd5e1"></i>Concepto → eje</span></label>
+  <div class="lnk" style="margin-top:4px"><i class="p"></i><span>Partículas = influencia entre autores</span></div>
+ </div>
+ <div class="lg"><h4>Etiquetas</h4><label class="row"><input type="checkbox" id="fLbl"> Mostrar todas</label></div>
+</aside>
+<aside class="panel" id="detail"></aside>
+<div class="panel" id="bar">
+ <button class="btn" id="legendToggle">☰</button>
+ <button class="btn star" id="bGuide">★ Guía del proyecto</button>
+ <div class="seg" id="modes"><button data-m="red" class="on">Red</button><button data-m="infl">Influencias</button><button data-m="ejes">Por ejes</button><button data-m="casos">Casos</button></div>
+ <div class="sep"></div><span class="lab">Ruta</span><select id="pA"></select><span class="lab">→</span><select id="pB"></select><button class="btn" id="pGo">Trazar</button>
+ <div class="sep"></div><button class="btn" id="bSrc">Fuentes</button><button class="btn" id="bHelp">?</button><button class="btn on" id="bRot" title="Rotación">⟳</button><button class="btn" id="bReset" title="Restablecer">⟲</button>
+</div>
+<div id="tip"></div>
+<div id="modal"><div class="box" id="mbox"></div></div>
+<template id="helpTpl"><div class="help"><div style="display:flex;justify-content:space-between"><h3>Cómo usar la red</h3><button class="x" id="mx">×</button></div>
+ <h4>Navegar por niveles</h4><ul>
+ <li>Los nodos con un <b>anillo pulsante</b> y "＋n" tienen contenido oculto. <b>Doble clic</b> para expandirlos, o usa <b>＋ Expandir</b> en el panel.</li>
+ <li><b>◎ Entrar en esta red</b> aísla un autor, obra o concepto con todo su contenido y sus conexiones externas. La barra superior permite volver.</li>
+ <li><b>Nivel de detalle</b>: 1 muestra autores y obras; 2 añade conceptos; 3 lo despliega todo.</li></ul>
+ <h4>Aprender</h4><ul>
+ <li><b>★ Guía del proyecto</b> recorre 10 fases de un proyecto real y dice qué recomienda cada autor en cada una.</li>
+ <li>El panel de cada nodo trae: idea en una frase (paráfrasis), ideas clave, cómo aplicarlo, errores a evitar, casos y fuentes.</li>
+ <li><b>Ruta</b> traza la conexión más corta entre dos ideas (p. ej. Brooks → Cohn).</li></ul>
+ <h4>Leer los enlaces</h4><ul>
+ <li>Línea continua = enlace documentado (DOC). Punteada = vínculo conceptual propuesto (CONC). Las partículas muestran influencias documentadas entre autores.</li></ul></div></template>
+<script>
+/* =========================================================================
+   DATOS · Red de conceptos de gestión de proyectos de software
+   Todas las "frases" son PARÁFRASIS de ideas publicadas, no citas textuales.
+   Jerarquía: autor/precursor → obra → concepto → elemento → (sub-elemento)
+   ========================================================================= */
+const AUT = {
+ pmbok:{n:'PMBOK 8',full:'PMI · Guía PMBOK® 8.ª ed. (2025)',color:'#E50914',arq:'El Integrador de Valor'},
+ pressman:{n:'Pressman',full:'Roger S. Pressman',color:'#2B6CB0',arq:'El Artesano de la Calidad'},
+ sommerville:{n:'Sommerville',full:'Ian Sommerville',color:'#8A2D4A',arq:'El Ingeniero de Sistemas'},
+ boehm:{n:'Boehm',full:'Barry W. Boehm (1935–2022)',color:'#2E9E5B',arq:'El Estratega del Riesgo'},
+ mcconnell:{n:'McConnell',full:'Steve McConnell',color:'#D97706',arq:'El Estimador Realista'},
+ cohn:{n:'Cohn',full:'Mike Cohn',color:'#6B46C1',arq:'El Facilitador Ágil'}
+};
+const AXES = {
+ plan:{n:'Planificación',d:'Planear con detalle, líneas base y control formal.'},
+ adapt:{n:'Adaptación',d:'Iterar, recibir retroalimentación y re-planificar.'},
+ riesgo:{n:'Riesgos',d:'Identificar, priorizar y atacar la incertidumbre.'},
+ estim:{n:'Estimación',d:'Medir, estimar con rangos y usar datos.'},
+ calidad:{n:'Calidad',d:'Verificación, validación, revisiones y proceso.'},
+ personas:{n:'Personas',d:'Equipo, comunicación y partes interesadas.'},
+ valor:{n:'Valor',d:'Entregar resultados útiles al cliente y al negocio.'}
+};
+const REF = {
+ perfil:{t:'Perfil SW · ¿Qué autor dirige tu proyecto? (fuente base de autores, aportes y casos)',u:'https://josefabiandiazsilva.github.io/perfil_sw/'},
+ pmi8:{t:'PMI · PMBOK® Guide – Eighth Edition (ficha oficial)',u:'https://www.pmi.org/pmbok-guide-standards/foundational/PMBOK'},
+ lt8:{t:'Learning Tree · PMBOK 8: 6 principios, 7 dominios y 5 áreas de enfoque',u:'https://www.learningtree.com/blog/pmbok-guide-8th-edition-whats-new/'},
+ or8:{t:'O’Reilly · PMBOK 8 (lista de los 6 principios)',u:'https://www.oreilly.com/library/view/-/9781628258301/'},
+ pmsc8:{t:'PM Study Circle · Qué hay de nuevo en el PMBOK 8',u:'https://pmstudycircle.com/pmbok-guide-8th-edition/'},
+ press:{t:'Pressman, R. y Maxim, B. (2019) Ingeniería del software: un enfoque práctico, 9.ª ed. McGraw-Hill',u:null},
+ somm:{t:'Sommerville, I. (2015) Ingeniería de software, 10.ª ed. Pearson',u:null},
+ sommesp:{t:'Sommerville, I. (2019) Engineering Software Products. Pearson',u:null},
+ see:{t:'Boehm, B. (1981) Software Engineering Economics. Prentice Hall',u:null},
+ cocomo2:{t:'Boehm, B. et al. (2000) Software Cost Estimation with COCOMO II. Prentice Hall',u:null},
+ b7p:{t:'Boehm, B. (1983) Seven Basic Principles of Software Engineering. Journal of Systems and Software 3(1)',u:'https://doi.org/10.1016/0164-1212(83)90003-1'},
+ wcone:{t:'Wikipedia · Cone of uncertainty (curva de embudo de Boehm, 1981)',u:'https://en.wikipedia.org/wiki/Cone_of_uncertainty'},
+ armour:{t:'Armour, P. (2008) The Inaccurate Conception. Communications of the ACM',u:'https://doi.org/10.1145/1325555.1325558'},
+ bossavit:{t:'Bossavit, L. The Leprechauns of Software Engineering, cap. 2 (crítica al cono)',u:'https://leanpub.com/read/leprechauns/leanpub-auto-chapter-2-the-cone-of-uncertainty'},
+ rework:{t:'Rework · Cono de la incertidumbre: por qué las estimaciones tempranas fallan',u:'https://resources.rework.com/es/libraries/project-management/cone-of-uncertainty'},
+ cohnaep:{t:'Cohn, M. (2005) Agile Estimating and Planning (cap. 1 cita el cono de Boehm)',u:'https://www.stat.cmu.edu/~brian/nynke/726-2021/612%20materials/36-612_Agile%20Estimating%20and%20Planning%20by%20Mike%20Cohn.pdf'},
+ cohnusa:{t:'Cohn, M. (2004) User Stories Applied. Addison-Wesley',u:null},
+ cohnswa:{t:'Cohn, M. (2009) Succeeding with Agile. Addison-Wesley',u:null},
+ ppwiki:{t:'Wikipedia · Planning poker (variante de Wideband Delphi; Grenning 2002, Cohn 2005)',u:'https://en.wikipedia.org/wiki/Planning_poker'},
+ mindtools:{t:'MindTools · Planning Poker: de Delphi (RAND) a Grenning y Cohn',u:'https://www.mindtools.com/a6x73n1/planning-poker-in-agile-project-management'},
+ w5hh:{t:'GeeksforGeeks · W5HH Principle (Boehm)',u:'https://www.geeksforgeeks.org/?p=532211'},
+ bt03:{t:'Boehm & Turner (2003) Observations on Balancing Discipline and Agility',u:'https://typeset.io/pdf/observations-on-balancing-discipline-and-agility-439ofod10a.pdf'},
+ btbook:{t:'Boehm & Turner (2003) Balancing Agility and Discipline (tabla de contenidos)',u:'https://informit.com/store/balancing-agility-and-discipline-a-guide-for-the-perplexed-9780321186126'},
+ usc02:{t:'Boehm (2002) CMMI and the Balance of Discipline — exposición al riesgo RE = P × L',u:'https://ndia.dtic.mil/wp-content/uploads/2002/cmmi/boehm.pdf'},
+ spiral88:{t:'Boehm, B. (1988) A Spiral Model of Software Development and Enhancement. IEEE Computer 21(5)',u:'https://doi.org/10.1109/2.59'},
+ risk91:{t:'Boehm, B. (1991) Software Risk Management: Principles and Practices. IEEE Software 8(1)',u:'https://doi.org/10.1109/52.62930'},
+ top10t:{t:'Boehm · Top-ten list of software risk items y técnicas de gestión (apuntes de curso)',u:'https://nrs-projects.humboldt.edu/~st10/f17cs458/458lect09-2/458lect09-2-boehm-top10-risks-to-post.pdf'},
+ bb01:{t:'Boehm, B. y Basili, V. (2001) Software Defect Reduction Top 10 List. IEEE Computer 34(1)',u:'https://doi.org/10.1109/2.962984'},
+ mccm:{t:'McConnell, S. (1996) Avoiding Classic Mistakes. IEEE Software 13(5)',u:'https://stevemcconnell.com/articles/classic-mistakes/'},
+ cxwp:{t:'Construx (2008) Software Development’s Classic Mistakes — white paper',u:'https://www.construx.com/resources/software-developments-classic-mistakes/'},
+ mccc:{t:'McConnell, S. (2004) Code Complete, 2.ª ed. Microsoft Press',u:null},
+ mcsg:{t:'McConnell, S. (1998) Software Project Survival Guide. Microsoft Press',u:null},
+ mcse:{t:'McConnell, S. (2006) Software Estimation: Demystifying the Black Art. Microsoft Press',u:null},
+ fowler:{t:'Fowler, M. · TestPyramid (atribuye la pirámide a Cohn, 2009)',u:'https://www.martinfowler.com/bliki/TestPyramid.html'},
+ mgs:{t:'Mountain Goat Software · The Forgotten Layer of the Test Automation Pyramid',u:'https://learn.mountaingoatsoftware.com/blog/the-forgotten-layer-of-the-test-automation-pyramid'},
+ brooks:{t:'Brooks, F. (1975/1995) The Mythical Man-Month. Addison-Wesley',u:null},
+ nsb:{t:'Brooks, F. (1987) No Silver Bullet: Essence and Accidents of Software Engineering. IEEE Computer 20(4)',u:'https://doi.org/10.1109/MC.1987.1663532'},
+ manif:{t:'Manifiesto por el Desarrollo Ágil de Software (2001)',u:'https://agilemanifesto.org/iso/es/manifesto.html'},
+ scrum:{t:'Schwaber, K. y Sutherland, J. (2020) La Guía de Scrum',u:'https://scrumguides.org/'},
+ peopleware:{t:'DeMarco, T. y Lister, T. (1987/2013) Peopleware. Addison-Wesley',u:null}
+};
+
+const NODES=[]; const IDX={};
+/* T(id, nombre, tipo, padre, opciones)
+   opciones: k (clase), d (descripción), f (frase-paráfrasis), i (ideas clave), r (cómo aplicarlo),
+             x (errores a evitar), ax (ejes), y (año), ref (fuente principal) */
+function T(id,n,t,p,o={}){const x={id,n,t,p:p||null,...o};NODES.push(x);IDX[id]=x;return id}
+let _c=0;
+function L(p,k,arr,common={}){return arr.map(a=>{const id=p+'_'+(++_c);T(id,a[0],'elemento',p,{k,d:a[1]||'',...common,...(a[2]||{})});return id})}
+
+/* ---------- AUTORES ---------- */
+T('pmbok','PMBOK 8','autor',null,{d:'Estándar del Project Management Institute (2025). Reduce los 12 principios de la 7.ª edición a 6, refina los dominios de desempeño a 7 y reintroduce 40 procesos no prescriptivos organizados en 5 áreas de enfoque. Admite enfoques predictivos, adaptativos e híbridos.',
+ f:'Un proyecto existe para entregar valor; los entregables son solo el medio.',
+ i:['Principios → comportamiento; dominios → qué gestionar; áreas de enfoque → cuándo y cómo.','Neutral frente a la metodología: pide adaptar (tailoring) en lugar de imponer un único ciclo de vida.','Incorpora temas nuevos: IA, evolución de la PMO, adquisiciones y sostenibilidad.'],
+ r:['Usa los 7 dominios como lista de chequeo de la salud del proyecto en cada reunión de seguimiento.','Antes de elegir prácticas, documenta por qué el contexto pide un enfoque predictivo, adaptativo o híbrido.'],ref:'pmi8'});
+T('pressman','Pressman','autor',null,{d:'Autor (con Bruce Maxim en ediciones recientes) de uno de los textos de ingeniería de software más usados en el mundo. Integra proceso, gestión, calidad y métricas en una visión de ingeniería.',
+ f:'La calidad no se prueba al final: se construye en cada actividad del proceso.',
+ i:['El proceso es un marco (5 actividades) más actividades sombrilla que lo atraviesan.','La gestión se enfoca en 4 P: personas, producto, proceso y proyecto.','Medir es condición para mejorar: métricas de proceso, proyecto y producto.'],
+ r:['Planifica explícitamente las actividades sombrilla (SQA, SCM, revisiones, riesgos); no las dejes como "si hay tiempo".','Revisa las 10 señales de peligro de Pressman en cada hito.'],ref:'press'});
+T('sommerville','Sommerville','autor',null,{d:'Profesor emérito de St Andrews. Su «Ingeniería de software» (10 ediciones) aporta la mirada de sistemas: requisitos, confiabilidad y sistemas sociotécnicos.',
+ f:'No existe un proceso ideal: el correcto depende del tipo de sistema, la organización y las personas.',
+ i:['Cuatro actividades fundamentales: especificación, diseño-implementación, validación y evolución.','Plan y ágil no son opuestos: casi todos los proyectos reales los combinan.','El software forma parte de sistemas sociotécnicos con propiedades emergentes.'],
+ r:['Decide el grado de plan vs. agilidad con factores explícitos (tamaño, regulación, vida útil, distribución del equipo).','Trata los requisitos no funcionales (confiabilidad, seguridad) como riesgos de primer nivel.'],ref:'somm'});
+T('boehm','Boehm','autor',null,{d:'Pionero de la economía del software (TRW, DARPA, USC). Creó COCOMO, el modelo en espiral, Theory W, la gestión de riesgos del software y el principio W5HH. Es el nodo con más influencia saliente de la red.',
+ f:'Identifica tus riesgos más altos y atácalos primero, antes de que ellos te ataquen a ti.',
+ i:['El riesgo es el criterio que decide cuánto proceso, cuánta planificación y cuánta documentación basta.','Estimar con modelos calibrados con datos, no por intuición.','Gestionar para que todas las partes interesadas ganen (Theory W).'],
+ r:['Calcula la exposición al riesgo (RE = P × L) y dedica esfuerzo a los de mayor RE.','Usa los hitos ancla LCO/LCA/IOC como compuertas de decisión.'],ref:'see'});
+T('mcconnell','McConnell','autor',null,{d:'Fundador de Construx Software. Traduce la investigación en prácticas concretas para equipos: construcción, errores clásicos, supervivencia de proyectos y estimación.',
+ f:'Una estimación no es un compromiso: primero entiende la incertidumbre, después promete.',
+ i:['Los errores clásicos son predecibles y evitables.','Estimar es un ejercicio analítico; negociar fechas es otro distinto.','La complejidad es el enemigo técnico principal.'],
+ r:['Usa la lista de errores clásicos como checklist de riesgos al iniciar y en los post-mortem.','Presenta siempre las estimaciones como rangos con supuestos explícitos.'],ref:'mcse'});
+T('cohn','Cohn','autor',null,{d:'Miembro fundador de la Agile Alliance y la Scrum Alliance. Referente práctico de historias de usuario, estimación y planificación ágil, y de la pirámide de automatización de pruebas.',
+ f:'Planifica lo suficiente para empezar, aprende en cada iteración y vuelve a planificar.',
+ i:['Planificar es un proceso continuo de búsqueda de valor, no un documento.','Separar el tamaño (puntos) de la duración (velocidad).','La conversación vale más que la especificación escrita.'],
+ r:['Mantén un backlog DEEP y re-prioriza por valor, costo, conocimiento y riesgo.','Mide la velocidad real antes de comprometer fechas de release.'],ref:'cohnaep'});
+/* ---------- PRECURSORES / COMPLEMENTOS ---------- */
+T('brooks','Fred Brooks','precursor',null,{d:'Gerente del OS/360 de IBM y autor de The Mythical Man-Month (1975) y No Silver Bullet (1986). Sus ideas sobre personas, comunicación y complejidad atraviesan toda la red.',y:1975,
+ f:'No hay una única técnica que multiplique por diez la productividad: la complejidad esencial no desaparece.',ref:'brooks'});
+T('demarco','DeMarco y Lister','precursor',null,{d:'Tom DeMarco y Timothy Lister, autores de Peopleware (1987): los mayores problemas de los proyectos son sociológicos, no tecnológicos.',y:1987,ref:'peopleware',
+ f:'La mayoría de los proyectos fracasan por personas y entorno, no por tecnología.'});
+T('scrumorg','Schwaber y Sutherland','precursor',null,{d:'Creadores de Scrum y autores de la Guía de Scrum (última versión 2020), el marco ágil más difundido.',y:1995,ref:'scrum'});
+T('agileall','Agile Alliance','precursor',null,{d:'Organización surgida tras el Manifiesto Ágil (2001). Cohn es miembro fundador; coeditó con el PMI la Guía Práctica de Ágil (2017).',y:2001,ref:'manif'});
+T('rand','RAND · Delphi','precursor',null,{d:'Método Delphi de pronóstico por consenso de expertos (década de 1950). Origen de Wideband Delphi y del planning poker.',y:1950,ref:'mindtools'});
+T('grenning','James Grenning','precursor',null,{d:'Definió y nombró el planning poker en 2002; Cohn lo popularizó en 2005.',y:2002,ref:'ppwiki'});
+T('turner','Richard Turner','precursor',null,{d:'Coautor con Boehm de Balancing Agility and Discipline (2003); integrante del equipo original de CMMI.',y:2003,ref:'btbook'});
+T('basili','Victor Basili','precursor',null,{d:'Investigador en ingeniería de software empírica (Universidad de Maryland); coautor con Boehm del Top 10 de reducción de defectos y creador del enfoque GQM.',y:2001,ref:'bb01'});
+
+/* =====================================================================
+   PMBOK 8
+   ===================================================================== */
+T('b_pmbok8','Guía PMBOK® 8.ª ed.','obra','pmbok',{y:2025,ref:'pmi8',d:'Volumen que integra El Estándar para la Dirección de Proyectos y la Guía PMBOK. Basado en más de 48 000 datos de practicantes.',
+ i:['6 principios (consolidan los 12 de la 7.ª ed.).','7 dominios de desempeño.','5 áreas de enfoque con 40 procesos adaptables.','Temas emergentes: IA, PMO, adquisiciones, sostenibilidad.']});
+T('g_pmp','6 principios','concepto','b_pmbok8',{ax:['valor'],ref:'or8',d:'Guían el comportamiento del equipo y del director cuando hay prioridades en conflicto.',f:'Pocos principios, memorables y aplicables a cualquier enfoque.'});
+T('p_hol','Adoptar una visión holística','elemento','g_pmp',{k:'Principio',ax:['plan','valor'],d:'Ver el proyecto como parte de un sistema mayor: las decisiones repercuten en la organización.',r:['Mapea dependencias, interfaces y contratos.','Nombra un responsable de la integración del sistema completo.'],x:['Gestionar cada contrato o equipo por separado (caso HealthCare.gov).']});
+T('p_val','Enfocarse en el valor','elemento','g_pmp',{k:'Principio',ax:['valor'],d:'Los entregables son medios; el fin son los beneficios para el negocio y el usuario.',r:['Define métricas de beneficio desde el inicio.','Prioriza el trabajo por valor y revísalo en cada entrega.'],x:['Medir el éxito solo por cumplir alcance, tiempo y costo.']});
+T('p_cal','Incorporar la calidad','elemento','g_pmp',{k:'Principio',ax:['calidad'],d:'La calidad se integra en procesos y entregables; no se inspecciona al final.',r:['Define criterios de aceptación y de "terminado" antes de construir.','Automatiza la verificación continua.'],x:['Sacrificar la calidad para cumplir una fecha.']});
+T('p_lid','Ser un líder responsable','elemento','g_pmp',{k:'Principio',ax:['personas'],d:'Liderar rindiendo cuentas, con transparencia y ética.',r:['Haz visibles las decisiones y sus responsables.','Escala con datos, no con opiniones.']});
+T('p_sos','Integrar la sostenibilidad','elemento','g_pmp',{k:'Principio',ax:['valor'],d:'Considerar impactos sociales, ambientales y económicos en todas las áreas del proyecto.',r:['Incluye criterios de sostenibilidad (energía, mantenimiento, accesibilidad) en las decisiones de diseño.']});
+T('p_emp','Construir una cultura empoderada','elemento','g_pmp',{k:'Principio',ax:['personas'],d:'Crear entornos donde los equipos se autoorganizan, deciden y prosperan sin microgestión.',r:['Delega decisiones al nivel que tiene la información.','Protege al equipo de interrupciones y cambios de prioridad constantes.'],x:['Copiar estructuras (squads, tribus) sin cambiar la cultura (caso Spotify).']});
+T('g_pmd','7 dominios de desempeño','concepto','b_pmbok8',{ax:['plan'],ref:'lt8',d:'Áreas interconectadas que el director debe mantener sanas durante todo el proyecto.'});
+T('d_gob','Gobernanza','elemento','g_pmd',{k:'Dominio',ax:['plan'],d:'Reglas, marcos y procesos de decisión que alinean el proyecto con los objetivos de la organización.',r:['Define quién decide qué, con qué umbrales de escalamiento.']});
+T('d_alc','Alcance','elemento','g_pmd',{k:'Dominio',ax:['plan'],d:'Definir, descomponer y controlar qué se entrega.',r:['Usa EDT/WBS o backlog, según el enfoque.','Controla los cambios con un umbral explícito.']});
+T('d_cro','Cronograma','elemento','g_pmd',{k:'Dominio',ax:['plan'],d:'Planificar, secuenciar y controlar el tiempo.',r:['Usa hitos verificables y reservas (buffers).']});
+T('d_fin','Finanzas','elemento','g_pmd',{k:'Dominio',ax:['estim'],d:'Costos, presupuesto, flujo de fondos y valor financiero.',r:['Presupuesta por rangos mientras la incertidumbre es alta.']});
+T('d_pi','Partes interesadas','elemento','g_pmd',{k:'Dominio',ax:['personas'],d:'Identificar, comprender e involucrar a quienes afectan o son afectados por el proyecto.',r:['Mantén un registro y un plan de involucramiento.','Da voz a los usuarios finales en las decisiones (caso NHS).']});
+T('d_rec','Recursos','elemento','g_pmd',{k:'Dominio',ax:['personas'],d:'Personas, equipos, materiales y servicios.',r:['Planifica la incorporación y el aprendizaje del personal nuevo.']});
+T('d_rie','Riesgos','elemento','g_pmd',{k:'Dominio',ax:['riesgo'],d:'Identificar, analizar y responder a amenazas y oportunidades.',r:['Revisa el registro de riesgos en cada ciclo de seguimiento.']});
+T('g_pmf','5 áreas de enfoque · 40 procesos','concepto','b_pmbok8',{ax:['plan'],ref:'lt8',d:'Novedad de la 8.ª ed.: reimaginan los antiguos grupos de procesos como áreas de enfoque, con 40 procesos que el equipo adapta.'});
+L('g_pmf','Área de enfoque',[
+ ['Inicio','Autorizar el proyecto, alinear objetivos y reconocer a las partes interesadas.'],
+ ['Planificación','Definir el enfoque, el alcance, el cronograma, el presupuesto y las respuestas a riesgos.'],
+ ['Ejecución','Coordinar personas y recursos para producir los entregables.'],
+ ['Monitoreo y control','Comparar el desempeño con el plan y aplicar cambios correctivos basados en datos.'],
+ ['Cierre','Transferir entregables, liberar recursos y capturar lecciones aprendidas.']],{ax:['plan']});
+T('c_tail','Adaptación (tailoring)','concepto','b_pmbok8',{ax:['adapt'],ref:'pmi8',d:'Ajustar prácticas, herramientas y técnicas al contexto del equipo, la organización y el entorno.',
+ i:['No existe un método universal: se elige y ajusta.','La adaptación también se revisa durante el proyecto.'],r:['Documenta qué prácticas usarás y por qué.','Revisa la adaptación en cada retrospectiva o fase.']});
+T('c_enf','Enfoques de desarrollo','concepto','b_pmbok8',{ax:['adapt'],ref:'pmi8',d:'PMBOK reconoce un continuo de enfoques, no una única metodología.'});
+L('c_enf','Enfoque',[
+ ['Predictivo','Alcance, tiempo y costo se definen temprano; adecuado cuando los requisitos son estables y el cambio es caro.'],
+ ['Adaptativo','Iterativo e incremental; adecuado cuando hay alta incertidumbre o los requisitos emergen.'],
+ ['Híbrido','Combina ambos: p. ej., hardware predictivo y software adaptativo, o fases iniciales predictivas.']],{ax:['adapt']});
+T('c_resp','Respuestas a riesgos','concepto','b_pmbok8',{ax:['riesgo'],ref:'pmi8',d:'Estrategias para amenazas y oportunidades.'});
+L('c_resp','Estrategia',[
+ ['Amenazas: evitar · mitigar · transferir · aceptar · escalar','Eliminar la causa, reducir probabilidad o impacto, pasar el riesgo a un tercero, asumirlo con reservas o elevarlo a quien tiene autoridad.'],
+ ['Oportunidades: explotar · mejorar · compartir · aceptar · escalar','Asegurar que ocurra, aumentar su probabilidad, compartirla con un socio, aprovecharla si llega o elevarla.']],{ax:['riesgo']});
+T('c_emerg','Temas emergentes','concepto','b_pmbok8',{ax:['valor'],ref:'lt8',d:'Áreas que la 8.ª edición incorpora para reflejar la práctica actual.'});
+L('c_emerg','Tema',[
+ ['IA en la dirección de proyectos','Uso de inteligencia artificial para pronóstico, análisis de riesgos y automatización, con supervisión humana.'],
+ ['Evolución de la PMO','La oficina de proyectos pasa de control a habilitación de valor.'],
+ ['Adquisiciones modernas','Contratos y proveedores alineados con entregas incrementales.']]);
+T('b_apg','Guía Práctica de Ágil','obra','pmbok',{y:2017,ref:'pmi8',d:'PMI y Agile Alliance (2017). Puente entre la dirección de proyectos tradicional y los enfoques ágiles.'});
+T('c_ciclos','Ciclos de vida','concepto','b_apg',{ax:['adapt'],d:'Cuatro tipos según la frecuencia de entrega y el grado de cambio.'});
+L('c_ciclos','Ciclo de vida',[
+ ['Predictivo','Una sola entrega al final; requisitos fijos.'],
+ ['Iterativo','Refinamiento por ciclos sucesivos; una entrega final.'],
+ ['Incremental','Entregas frecuentes de partes terminadas.'],
+ ['Ágil','Iterativo + incremental: refinar y entregar con frecuencia.']]);
+T('c_servant','Liderazgo de servicio','concepto','b_apg',{ax:['personas'],d:'El líder elimina impedimentos, facilita y desarrolla al equipo en lugar de dirigirlo y controlarlo.',r:['Pregunta cada día: ¿qué está bloqueando al equipo?']});
+T('c_rolesag','Roles en equipos ágiles','concepto','b_apg',{ax:['personas'],d:'Equipo multifuncional, responsable del producto y facilitador.'});
+
+/* =====================================================================
+   PRESSMAN
+   ===================================================================== */
+T('b_press','Ingeniería del software: un enfoque práctico','obra','pressman',{y:1982,ref:'press',d:'1.ª ed. 1982 · 9.ª ed. 2019 (con B. Maxim). Cubre proceso, modelado, calidad, gestión de proyectos y temas avanzados.',
+ i:['Parte I: el proceso del software.','Parte II: modelado.','Parte III: calidad y seguridad.','Parte IV: gestión de proyectos (4 P, métricas, estimación, riesgos).']});
+T('c_marco','Marco genérico del proceso','concepto','b_press',{ax:['plan'],d:'Cinco actividades estructurales aplicables a cualquier proyecto, más actividades sombrilla.'});
+L('c_marco','Actividad',[
+ ['Comunicación','Entender objetivos y requisitos con el cliente y las partes interesadas.'],
+ ['Planeación','Plan de proyecto: tareas, riesgos, recursos, productos de trabajo y calendario.'],
+ ['Modelado','Modelos de requisitos y de diseño para entender mejor antes de construir.'],
+ ['Construcción','Generación de código y pruebas.'],
+ ['Despliegue','Entrega al cliente, quien evalúa y retroalimenta.']],{ax:['plan']});
+T('c_modelos','Modelos de proceso','concepto','b_press',{ax:['adapt','plan'],d:'Diferentes formas de organizar el flujo de las actividades del marco.'});
+L('c_modelos','Modelo',[
+ ['Cascada','Secuencial; útil con requisitos estables y bien entendidos.'],
+ ['Incremental','Entrega funcionalidad por incrementos operativos.'],
+ ['Prototipos','Construir para aprender requisitos inciertos; el prototipo se desecha o evoluciona.'],
+ ['Concurrente','Actividades en paralelo con estados y eventos de transición.'],
+ ['Proceso Unificado','Iterativo, guiado por casos de uso, centrado en la arquitectura: inicio, elaboración, construcción, transición.']],{ax:['adapt']});
+T('c_4p','Las 4 P de la gestión','concepto','b_press',{ax:['plan','personas'],d:'El espectro de la gestión de proyectos de software según Pressman.',f:'Las personas son el elemento más importante de un proyecto exitoso.'});
+L('c_4p','P',[
+ ['Personas','Participantes, líderes de equipo y estructura del equipo; el factor más influyente.'],
+ ['Producto','Objetivos y alcance definidos, alternativas y restricciones antes de planificar.'],
+ ['Proceso','Marco de actividades adaptado al proyecto.'],
+ ['Proyecto','Planificación, monitoreo y control para gestionar la complejidad y evitar el fracaso.']],{ax:['plan']});
+T('c_somb','Actividades sombrilla','concepto','b_press',{ax:['calidad'],d:'Actividades que recorren todo el proceso y protegen la calidad, el control y el avance.',f:'Las actividades sombrilla no son opcionales: son las que mantienen sano el proyecto.',
+ r:['Asígnales responsables y tiempo en el plan desde el primer día.'],x:['Recortarlas cuando el cronograma aprieta (ver "recortar QA" de McConnell).']});
+L('c_somb','Actividad sombrilla',[
+ ['Seguimiento y control del proyecto','Comparar avance con el plan y actuar.'],
+ ['Gestión del riesgo','Evaluar riesgos que pueden afectar el resultado o la calidad.'],
+ ['Medición','Definir y recolectar medidas de proceso, proyecto y producto.'],
+ ['Gestión de la reutilización','Criterios para reutilizar productos de trabajo.'],
+ ['Preparación y producción de productos de trabajo','Modelos, documentos, registros y listas.']],{ax:['calidad']});
+T('c_sqa','Aseguramiento de calidad (SQA)','concepto','c_somb',{ax:['calidad'],d:'Actividades planificadas para garantizar que el proceso y el producto cumplen estándares.',i:['Estándares, revisiones y auditorías, pruebas, recolección de errores, gestión del cambio, educación y gestión de proveedores.']});
+T('c_scm','Gestión de configuración (SCM)','concepto','c_somb',{ax:['calidad'],d:'Identificación de elementos de configuración, control de versiones, control de cambios, auditoría y reportes de estado.',r:['Ningún despliegue sin versión etiquetada y verificada en todos los servidores (caso Knight Capital).']});
+T('c_rev','Revisiones técnicas','concepto','c_somb',{ax:['calidad'],d:'Inspecciones y revisiones formales para detectar defectos lo antes posible.',
+ r:['Revisa el producto, no al productor.','Usa agenda y listas de verificación; limita la sesión (unas 2 horas).','Registra problemas; no los resuelvas en la reunión.'],x:['Revisiones sin preparación previa.']});
+T('c_hooker','7 principios de la práctica','concepto','b_press',{ax:['calidad','valor'],d:'Principios generales de David Hooker que Pressman presenta como base de toda práctica de ingeniería de software.'});
+L('c_hooker','Principio',[
+ ['La razón de que todo exista','Todo debe aportar valor real al usuario.'],
+ ['Mantenlo simple (KISS)','Tan simple como sea posible, pero no más.'],
+ ['Mantén la visión','Una visión clara de la arquitectura y del producto evita la fragmentación.'],
+ ['Otros consumirán lo que produces','Escribe y diseña pensando en quien lo usará y mantendrá.'],
+ ['Ábrete al futuro','Diseña para el cambio y la vida útil larga.'],
+ ['Planea la reutilización','La reutilización se diseña, no ocurre sola.'],
+ ['¡Piensa!','Pensar con claridad antes de actuar casi siempre produce mejores resultados.']]);
+T('c_estimP','Estimación de proyectos','concepto','b_press',{ax:['estim'],d:'Técnicas de descomposición y modelos empíricos para estimar esfuerzo y costo.',r:['Usa al menos dos técnicas y concilia las diferencias.']});
+L('c_estimP','Técnica',[
+ ['Líneas de código (LOC)','Estimación basada en tamaño; requiere datos históricos.'],
+ ['Puntos de función','Tamaño funcional independiente del lenguaje.'],
+ ['Basada en casos de uso','Estimación a partir del número y complejidad de casos de uso.'],
+ ['Decisión hacer / comprar','Árbol de decisión para desarrollar, reutilizar, comprar o subcontratar.']],{ax:['estim']});
+T('c_rmmm','Riesgos: plan RMMM','concepto','b_press',{ax:['riesgo'],d:'Mitigación, monitoreo y gestión de riesgos.',i:['Estrategia proactiva mejor que reactiva ("bombero").','Riesgos de proyecto, técnicos y de negocio; genéricos y específicos del producto.'],
+ r:['Construye una tabla de riesgos con probabilidad e impacto y define una línea de corte.','Para cada riesgo sobre la línea: plan de mitigación, indicadores de monitoreo y plan de contingencia.']});
+L('c_rmmm','Herramienta',[
+ ['Tabla de riesgos','Lista priorizada por probabilidad e impacto con línea de corte.'],
+ ['Hoja de información del riesgo (RIS)','Ficha por riesgo: descripción, contexto, mitigación, monitoreo y contingencia.']],{ax:['riesgo']});
+T('c_peligro','10 señales de proyecto en peligro','concepto','b_press',{ax:['riesgo'],d:'Síntomas que indican que un proyecto de sistemas de información está en riesgo serio.',r:['Revísalas en cada hito; tres o más presentes justifican una revisión del plan.']});
+L('c_peligro','Señal',[
+ ['El equipo no entiende las necesidades del cliente',''],['El alcance está mal definido',''],['Los cambios se gestionan mal',''],['La tecnología elegida cambia',''],['Las necesidades del negocio cambian o se definen mal',''],['Los plazos son irreales',''],['Los usuarios se resisten',''],['Se pierde el patrocinio',''],['Al equipo le faltan habilidades',''],['Los gerentes evitan las buenas prácticas y las lecciones aprendidas','']],{ax:['riesgo']});
+T('c_costcal','Costo de la calidad','concepto','b_press',{ax:['calidad'],d:'La calidad tiene un costo, pero la mala calidad cuesta más.',f:'Invertir en prevención es más barato que pagar fallas externas.'});
+L('c_costcal','Categoría',[
+ ['Prevención','Planificación de calidad, revisiones de requisitos y diseño, formación.'],
+ ['Evaluación','Inspecciones, pruebas, mantenimiento de herramientas.'],
+ ['Falla interna','Retrabajo y reparación antes de entregar.'],
+ ['Falla externa','Soporte, devoluciones, daño reputacional tras la entrega: la más cara.']],{ax:['calidad']});
+T('c_met','Métricas','concepto','b_press',{ax:['calidad','estim'],d:'Medidas de proceso, proyecto y producto para mejorar y estimar.'});
+L('c_met','Tipo',[
+ ['Métricas de proceso','Indicadores a largo plazo para mejorar el proceso de la organización.'],
+ ['Métricas de proyecto','Seguimiento táctico: esfuerzo, avance, defectos, cambios.'],
+ ['Métricas de producto','Tamaño, complejidad, calidad del diseño y del código.'],
+ ['GQM (Meta–Pregunta–Métrica)','Definir metas, derivar preguntas y solo entonces métricas (Basili).']],{ax:['estim']});
+
+/* =====================================================================
+   SOMMERVILLE
+   ===================================================================== */
+T('b_somm','Ingeniería de software','obra','sommerville',{y:1982,ref:'somm',d:'1.ª ed. 1982 · 10.ª ed. 2015. Introducción, confiabilidad y seguridad, ingeniería de software avanzada y gestión del software.',
+ i:['Cap. 22: gestión de proyectos (riesgos, personas, equipos).','Cap. 23: planificación (precio, calendarización, planificación ágil, estimación).','Cap. 24–25: calidad y configuración.']});
+T('c_act','Actividades fundamentales','concepto','b_somm',{ax:['plan'],d:'Toda forma de proceso incluye cuatro actividades.'});
+L('c_act','Actividad',[
+ ['Especificación','Definir qué hará el sistema y sus restricciones.'],
+ ['Diseño e implementación','Definir la organización del sistema y construirlo.'],
+ ['Validación','Comprobar que hace lo que el cliente quiere.'],
+ ['Evolución','Cambiar el sistema ante nuevas necesidades.']]);
+T('c_req','Ingeniería de requisitos','concepto','b_somm',{ax:['valor','calidad'],d:'Descubrir, documentar, validar y gestionar los requisitos.',f:'Un requisito equivocado cuesta más corregirlo cuanto más tarde se descubre.',
+ r:['Distingue requisitos de usuario (lenguaje natural) y de sistema (detallados).','Valida con prototipos y revisiones con usuarios reales.']});
+L('c_req','Actividad',[
+ ['Obtención y análisis','Entrevistas, etnografía, escenarios y casos de uso.'],
+ ['Especificación','Requisitos funcionales y no funcionales documentados.'],
+ ['Validación','Revisar validez, consistencia, completitud, realismo y verificabilidad.'],
+ ['Gestión del cambio','Trazabilidad y análisis de impacto de cada cambio.'],
+ ['Funcionales vs. no funcionales','Los no funcionales (rendimiento, seguridad) suelen ser los más críticos.']],{ax:['calidad']});
+T('c_hib','Plan vs. ágil: factores de decisión','concepto','b_somm',{ax:['adapt'],d:'La mayoría de los proyectos mezcla prácticas dirigidas por plan y ágiles; la proporción depende de factores técnicos, humanos y organizacionales.'});
+L('c_hib','Factor',[
+ ['Tamaño del sistema y del equipo','Equipos grandes y distribuidos necesitan más documentación y coordinación.'],
+ ['Tipo de sistema y regulación','Sistemas críticos o regulados exigen análisis y documentación previa.'],
+ ['Vida útil esperada','Sistemas de larga vida requieren documentación de diseño para el mantenimiento.'],
+ ['Habilidades del equipo','Lo ágil requiere personal experimentado y autónomo.'],
+ ['Cultura organizacional','Organizaciones tradicionales tienden a planes y documentación formal.'],
+ ['Tecnología y herramientas','Buenas herramientas de seguimiento del diseño favorecen enfoques ágiles a escala.']],{ax:['adapt']});
+T('c_socio','Sistemas sociotécnicos','concepto','b_somm',{ax:['personas'],d:'Hardware, software, procesos, personas, organizaciones y sociedad forman un sistema que falla en conjunto.'});
+L('c_socio','Característica',[
+ ['Propiedades emergentes','Confiabilidad, seguridad o usabilidad dependen del sistema completo, no de partes aisladas.'],
+ ['No determinismo','Las personas no responden igual siempre; el sistema tampoco.'],
+ ['Éxito subjetivo','Distintas partes interesadas juzgan el éxito con criterios distintos.'],
+ ['Capas','Equipo, SO, comunicaciones, software, aplicación, procesos de negocio, organización y sociedad.']],{ax:['personas']});
+T('c_conf','Confiabilidad (dependability)','concepto','b_somm',{ax:['calidad'],d:'Grado de confianza de los usuarios en que el sistema funcionará como esperan.'});
+L('c_conf','Atributo',[
+ ['Disponibilidad','Probabilidad de que el sistema esté operativo cuando se necesita.'],
+ ['Fiabilidad','Probabilidad de operar sin fallas durante un tiempo.'],
+ ['Seguridad (safety)','Capacidad de operar sin causar daños.'],
+ ['Protección (security)','Resistencia a ataques accidentales o deliberados.'],
+ ['Resiliencia','Mantener servicios críticos frente a eventos adversos.']],{ax:['calidad']});
+T('c_triesgo','Gestión de riesgos (Sommerville)','concepto','b_somm',{ax:['riesgo'],d:'Proceso iterativo de cuatro etapas, aplicado a riesgos de proyecto, de producto y de negocio.'});
+L('c_triesgo','Etapa / tipo',[
+ ['Identificación','Riesgos de tecnología, personas, organización, herramientas, requisitos y estimación.'],
+ ['Análisis','Probabilidad (muy baja a muy alta) y efecto (insignificante a catastrófico).'],
+ ['Planificación','Estrategias de evitación, minimización y contingencia.'],
+ ['Monitoreo','Revisar regularmente indicadores de cada riesgo.'],
+ ['Tipos: proyecto · producto · negocio','Afectan el cronograma, la calidad del software o a la organización.']],{ax:['riesgo']});
+T('c_gpers','Gestión de personas','concepto','b_somm',{ax:['personas'],d:'Cuatro factores críticos de la gestión de personas, más motivación y equipos pequeños.',f:'Las personas son el activo más importante de una organización de software.'});
+L('c_gpers','Factor',[
+ ['Consistencia','Tratar a todos de forma comparable.'],
+ ['Respeto','Reconocer habilidades distintas y dar oportunidades de contribuir.'],
+ ['Inclusión','Escuchar y considerar las propuestas de todos.'],
+ ['Honestidad','Decir la verdad sobre lo que va bien y lo que va mal.'],
+ ['Equipos pequeños y cohesionados','Grupos reducidos comunican mejor y comparten conocimiento.']],{ax:['personas']});
+T('c_plansom','Planificación y estimación','concepto','b_somm',{ax:['plan','estim'],d:'Fijación de precio, calendarización, planificación ágil y técnicas de estimación.'});
+L('c_plansom','Tema',[
+ ['Fijación de precio','El precio considera factores de mercado, contractuales y de incertidumbre, no solo el costo.'],
+ ['Calendarización','Actividades, hitos y entregables; dependencias y caminos críticos.'],
+ ['Planificación ágil','Planificación de releases e iteraciones con historias y velocidad.'],
+ ['Estimación por experiencia vs. algorítmica','Juicio experto frente a modelos como COCOMO II.']],{ax:['estim']});
+T('c_reuso','Validar la reutilización','concepto','b_somm',{ax:['calidad','riesgo'],d:'Lo reutilizado debe validarse en su nuevo contexto: "ya funcionó antes" no es evidencia (caso Ariane 5).'});
+T('b_esp','Engineering Software Products','obra','sommerville',{y:2019,ref:'sommesp',d:'Sommerville, 2019. Ingeniería de productos de software (no proyectos por encargo): visión, personas, escenarios, historias, Scrum, nube, seguridad y DevOps.'});
+T('c_prodvsproy','Producto vs. proyecto','concepto','b_esp',{ax:['valor'],d:'En un producto, la empresa define los requisitos y el valor se juega en el mercado; en un proyecto, el cliente los define.',r:['Formula una visión de producto: qué, para quién, por qué y en qué se diferencia.']});
+T('c_personas','Personas y escenarios','concepto','b_esp',{ax:['valor'],d:'Personajes ficticios realistas y relatos de uso para descubrir funcionalidades.'});
+T('c_devops','DevOps y gestión de código','concepto','b_esp',{ax:['calidad'],d:'Integración y despliegue continuos, control de versiones y automatización de pruebas.'});
+
+/* =====================================================================
+   BOEHM
+   ===================================================================== */
+T('b_see','Software Engineering Economics','obra','boehm',{y:1981,ref:'see',d:'Boehm, 1981. Fundó la economía del software: COCOMO, la curva de embudo y el costo de los defectos por fase.'});
+T('c_cocomo','COCOMO (1981)','concepto','b_see',{ax:['estim'],d:'Modelo constructivo de costos: esfuerzo = a · (KLOC)^b, ajustado por multiplicadores.',r:['Calibra los coeficientes con datos de tu organización.']});
+L('c_cocomo','Elemento',[
+ ['Tres niveles: básico, intermedio, detallado','Precisión creciente según la información disponible.'],
+ ['Modos: orgánico, semiacoplado, empotrado','Desde equipos pequeños en entornos conocidos hasta restricciones rígidas de hardware.'],
+ ['Multiplicadores de esfuerzo','Atributos del producto, la plataforma, el personal y el proyecto.']],{ax:['estim']});
+T('c_cono','Cono de incertidumbre','concepto','b_see',{ax:['estim','riesgo'],ref:'wcone',d:'La precisión de una estimación mejora a medida que se toman decisiones. Boehm lo dibujó en 1981 como «curva de embudo»; McConnell lo nombró y popularizó.',
+ f:'Al inicio, una estimación puede errar por un factor de 4 en cualquier dirección.',
+ i:['El cono es el mejor caso: un proyecto mal gestionado tiene una "nube", no un cono.','Se estrecha por decisiones, no por el paso del tiempo.','Bossavit muestra que los rangos originales eran juicio experto, no datos.'],
+ r:['No comprometas fechas en la parte ancha del cono.','Re-estima en cada hito.'],x:['Fijar fecha y presupuesto en el concepto inicial (Denver, Queensland).']});
+T('c_defcost','Costo de defectos por fase','concepto','b_see',{ax:['calidad'],d:'Corregir un defecto cuesta más cuanto más tarde se detecta.',f:'Encontrar y corregir un problema después de la entrega suele costar mucho más que hacerlo en requisitos o diseño.'});
+T('c_wbd','Wideband Delphi','concepto','b_see',{ax:['estim'],d:'Estimación por consenso de expertos con rondas, discusión de supuestos y nueva estimación anónima.'});
+T('b_cocomo2','COCOMO II (2000)','obra','boehm',{y:2000,ref:'cocomo2',d:'Actualización del modelo para procesos modernos, reutilización y desarrollo iterativo.'});
+T('c_cocomo2','Factores de escala de COCOMO II','concepto','b_cocomo2',{ax:['estim'],d:'Cinco factores que determinan las deseconomías de escala del esfuerzo.'});
+L('c_cocomo2','Factor',[
+ ['PREC · Precedencia','¿Qué tan familiar es este tipo de sistema?'],
+ ['FLEX · Flexibilidad de desarrollo','¿Cuánta rigidez imponen los requisitos y el proceso?'],
+ ['RESL · Resolución de arquitectura y riesgos','¿Cuánto riesgo se resolvió antes de construir?'],
+ ['TEAM · Cohesión del equipo','¿Qué tan bien colaboran las partes interesadas?'],
+ ['PMAT · Madurez del proceso','Nivel de madurez (p. ej., CMM) de la organización.']],{ax:['estim']});
+T('c_cocomo2m','Modelos por etapa','concepto','b_cocomo2',{ax:['estim'],d:'Composición de aplicaciones (prototipos), diseño temprano y post-arquitectura: el modelo crece con la información disponible.'});
+T('b_spiral','Modelo en espiral (1988)','obra','boehm',{y:1988,ref:'spiral88',d:'IEEE Computer, 1988. Proceso iterativo guiado por riesgo.'});
+T('c_espiral','Modelo en espiral','concepto','b_spiral',{ax:['riesgo','adapt'],d:'Cada vuelta de la espiral empieza por los objetivos y el riesgo más alto, y termina con un compromiso para la siguiente.',f:'El riesgo decide qué hacer a continuación y con cuánto detalle.',
+ r:['Planifica cada iteración alrededor del riesgo dominante.'],x:['Usar la espiral como una cascada repetida sin análisis de riesgo.']});
+L('c_espiral','Cuadrante / hito',[
+ ['1 · Objetivos, alternativas y restricciones','Qué se quiere lograr y con qué opciones.'],
+ ['2 · Evaluar alternativas; identificar y resolver riesgos','Prototipos, simulaciones, benchmarks.'],
+ ['3 · Desarrollar y verificar','Construir el producto del ciclo.'],
+ ['4 · Planificar la siguiente vuelta','Revisión con las partes interesadas y compromiso.'],
+ ['Hitos ancla: LCO · LCA · IOC','Objetivos del ciclo de vida, arquitectura del ciclo de vida y capacidad operativa inicial: compuertas de compromiso (1996).']],{ax:['riesgo']});
+T('b_risk91','Software Risk Management (1991)','obra','boehm',{y:1991,ref:'risk91',d:'IEEE Software, 1991. Principios, proceso y lista de los 10 riesgos principales.'});
+T('c_procrisk','Proceso de gestión de riesgos','concepto','b_risk91',{ax:['riesgo'],d:'Dos grandes etapas: evaluación y control.'});
+L('c_procrisk','Paso',[
+ ['Evaluación: identificación','Listas de chequeo, análisis de supuestos, descomposición.'],
+ ['Evaluación: análisis','Modelos de costo, rendimiento, redes, calidad.'],
+ ['Evaluación: priorización','Exposición al riesgo y apalancamiento de la reducción.'],
+ ['Control: planificación','Comprar información, evitar, transferir, reducir, planificar elementos.'],
+ ['Control: resolución','Prototipos, simulaciones, benchmarks, personal.'],
+ ['Control: monitoreo','Seguimiento de hitos y del top 10 de riesgos.']],{ax:['riesgo']});
+T('c_top10','Top 10 riesgos del software','concepto','b_risk91',{ax:['riesgo'],ref:'top10t',d:'Lista priorizada de Boehm con técnicas de gestión para cada riesgo.',f:'Los proyectos exitosos tienen en común una preocupación temprana y explícita por sus elementos de alto riesgo.',r:['Úsala como checklist inicial y actualiza un "top 10" propio cada mes.']});
+L('c_top10','Riesgo',[
+ ['1 · Déficit de personal','Técnicas: personal de alto nivel, ajuste puesto-persona, formación de equipo, moral, entrenamiento cruzado.'],
+ ['2 · Cronogramas y presupuestos irreales','Técnicas: estimación detallada con varias fuentes, diseño por costo, desarrollo incremental, reutilización, depurar requisitos.'],
+ ['3 · Desarrollar funciones equivocadas','Técnicas: análisis de la organización y la misión, encuestas a usuarios, prototipos, manuales de usuario tempranos.'],
+ ['4 · Interfaz de usuario equivocada','Técnicas: análisis de tareas, prototipos, escenarios, caracterización del usuario.'],
+ ['5 · Sobredorado (gold plating)','Técnicas: depurar requisitos, prototipos, análisis costo-beneficio, diseño por costo.'],
+ ['6 · Flujo continuo de cambios de requisitos','Técnicas: umbral alto de cambio, ocultamiento de información, desarrollo incremental (diferir cambios).'],
+ ['7 · Componentes externos deficientes','Técnicas: benchmarking, inspecciones, verificación de referencias, análisis de compatibilidad.'],
+ ['8 · Tareas externas deficientes','Técnicas: verificar referencias, auditorías previas, contratos con incentivos, diseño competitivo, formación de equipo.'],
+ ['9 · Rendimiento en tiempo real insuficiente','Técnicas: simulación, benchmarking, modelado, prototipos, instrumentación, ajuste.'],
+ ['10 · Forzar los límites de la ciencia computacional','Técnicas: análisis técnico, costo-beneficio, prototipos, verificar referencias.']],{ax:['riesgo'],ref:'top10t'});
+T('c_re','Exposición al riesgo (RE)','concepto','b_risk91',{ax:['riesgo','estim'],ref:'usc02',d:'RE = probabilidad de pérdida × magnitud de la pérdida. Base para priorizar y para decidir cuánta planificación basta.',
+ i:['Apalancamiento de la reducción (RRL) = (RE antes − RE después) / costo de la reducción.','Más planificación reduce el riesgo de omisiones, pero aumenta el de llegar tarde al mercado: hay un punto óptimo.'],r:['Invierte primero donde el RRL es mayor.']});
+T('b_7p','Siete principios básicos (1983)','obra','boehm',{y:1983,ref:'b7p',d:'Boehm destila cientos de aforismos de ingeniería de software en siete principios.'});
+L('b_7p','Principio',[
+ ['1 · Gestionar con un plan de ciclo de vida por fases','La mala planificación aparece como causa en la mayoría de los fracasos.'],
+ ['2 · Validar continuamente','Sacar los errores lo antes posible.'],
+ ['3 · Mantener un control disciplinado del producto','Líneas base y control de cambios.'],
+ ['4 · Usar prácticas modernas de programación','Diseño y programación estructurados, revisiones.'],
+ ['5 · Mantener clara la responsabilidad por los resultados','Cada producto con un responsable y un criterio de terminado.'],
+ ['6 · Usar mejores y menos personas','La capacidad del personal pesa más que su número.'],
+ ['7 · Comprometerse con la mejora del proceso','Medir y aprender de cada proyecto.']],{ax:['calidad','plan'],ref:'b7p'});
+T('b_bad','Balancing Agility and Discipline','obra','boehm',{y:2003,ref:'btbook',d:'Boehm y Turner, 2003. Ni ágil ni dirigido por plan son una bala de plata; el riesgo indica la mezcla adecuada.'});
+T('c_home','Home grounds: 5 factores críticos','concepto','b_bad',{ax:['adapt','riesgo'],ref:'bt03',d:'Cinco factores indican dónde domina cada enfoque; las excepciones se tratan como riesgos.'});
+L('c_home','Factor',[
+ ['Tamaño','Equipos y productos pequeños favorecen lo ágil.'],
+ ['Criticidad','Pérdida de vidas o grandes sumas favorece lo dirigido por plan.'],
+ ['Dinamismo','Alto ritmo de cambio de requisitos favorece lo ágil.'],
+ ['Personal','Lo ágil necesita más personas de alto nivel de habilidad.'],
+ ['Cultura','¿El equipo prospera con libertad o con orden y reglas claras?']],{ax:['adapt']});
+T('c_5pasos','Método de 5 pasos basado en riesgo','concepto','b_bad',{ax:['adapt','riesgo'],ref:'btbook',d:'Integra prácticas ágiles y dirigidas por plan en un método híbrido para cada proyecto.'});
+L('c_5pasos','Paso',[
+ ['1 · Calificar riesgos ambientales, ágiles y de plan',''],
+ ['2 · Comparar: ¿domina un tipo de riesgo?',''],
+ ['3 · Arquitectura que separe partes ágiles y dirigidas por plan',''],
+ ['4 · Estrategia general de desarrollo y resolución de riesgos',''],
+ ['5 · Monitorear y recalibrar','']]);
+T('c_concl','6 conclusiones','concepto','b_bad',{ax:['adapt'],ref:'btbook',d:'Conclusiones del libro.'});
+L('c_concl','Conclusión',[
+ ['Ningún método es una bala de plata',''],['Cada enfoque tiene su terreno natural',''],['El futuro exige agilidad y disciplina',''],['Surgen métodos equilibrados',''],
+ ['Construye tu método hacia arriba; no lo recortes hacia abajo',''],['Enfócate menos en métodos y más en personas, valores, comunicación y expectativas','']]);
+T('b_defect','Top 10 reducción de defectos (2001)','obra','boehm',{y:2001,ref:'bb01',d:'Boehm y Basili, IEEE Computer, 2001. Diez hallazgos empíricos sobre defectos y retrabajo.'});
+L('b_defect','Hallazgo',[
+ ['Corregir tras la entrega suele costar ~100× más','Frente a corregir en requisitos o diseño (en sistemas grandes).'],
+ ['40–50 % del esfuerzo se va en retrabajo evitable',''],
+ ['~80 % del retrabajo evitable viene de ~20 % de los defectos',''],
+ ['~80 % de los defectos están en ~20 % de los módulos','Y cerca de la mitad de los módulos no tiene defectos.'],
+ ['~90 % del tiempo fuera de servicio viene de ≤10 % de los defectos',''],
+ ['Las revisiones entre pares detectan ~60 % de los defectos',''],
+ ['Las revisiones por perspectivas detectan ~35 % más que las no dirigidas',''],
+ ['Prácticas personales disciplinadas reducen hasta 75 % la introducción de defectos','PSP/TSP.'],
+ ['El software de alta confiabilidad cuesta más por instrucción','Pero se paga si hay costos de operación y mantenimiento significativos.'],
+ ['40–50 % de los programas hechos por usuarios tienen defectos no triviales','']],{ax:['calidad'],ref:'bb01'});
+T('c_thw','Theory W','concepto','boehm',{ax:['personas','valor'],ref:'btbook',y:1989,d:'Teoría de gestión: hacer que todas las partes interesadas ganen.',f:'Haz ganadores a todos: si alguien pierde, tarde o temprano todos pierden.'});
+L('c_thw','Paso',[
+ ['Identificar a las partes interesadas clave',''],
+ ['Identificar sus condiciones de victoria',''],
+ ['Negociar soluciones gana-gana',''],
+ ['Modelo WinWin en espiral','Integra la negociación de condiciones de victoria en cada vuelta de la espiral.']],{ax:['personas']});
+T('c_w5hh','Principio W5HH','concepto','boehm',{ax:['plan'],ref:'w5hh',y:1996,d:'Siete preguntas que producen un plan mínimo que escala a cualquier tamaño de proyecto (adoptado por Pressman).'});
+L('c_w5hh','Pregunta',[
+ ['¿Por qué se desarrolla el sistema?','Justificación de negocio.'],['¿Qué se hará?','Funcionalidad y tareas.'],['¿Cuándo se hará?','Hitos y calendario.'],
+ ['¿Quién es responsable de cada función?','Roles y responsabilidades.'],['¿Dónde están ubicados organizacionalmente?','Cliente, usuarios y otras partes también tienen responsabilidades.'],
+ ['¿Cómo se hará técnica y gerencialmente?','Estrategia técnica y de gestión.'],['¿Cuánto de cada recurso se necesita?','Estimaciones derivadas de lo anterior.']],{ax:['plan']});
+
+/* =====================================================================
+   McCONNELL
+   ===================================================================== */
+T('b_cc','Code Complete','obra','mcconnell',{y:1993,ref:'mccc',d:'1993 · 2.ª ed. 2004. Manual de construcción de software basado en investigación.',f:'Escribe programas primero para las personas y después para las computadoras.'});
+T('c_complex','Gestionar la complejidad','concepto','b_cc',{ax:['calidad'],d:'El imperativo técnico principal del software es gestionar la complejidad.',r:['Divide el sistema en subsistemas con interfaces simples.','Oculta información y reduce lo que hay que tener en mente a la vez.']});
+T('c_prereq','Prerrequisitos de la construcción','concepto','b_cc',{ax:['plan','calidad'],d:'Definición del problema, requisitos y arquitectura antes de construir: mide dos veces, corta una.',x:['Empezar a programar sin entender el problema.']});
+T('c_constr','Prácticas de construcción','concepto','b_cc',{ax:['calidad'],d:'Construcción de calidad: diseño, código legible, verificación y mejora continua.'});
+L('c_constr','Práctica',[
+ ['Ocultamiento de información','Esconder decisiones de diseño que pueden cambiar.'],
+ ['Rutinas cohesivas','Cada rutina hace una sola cosa bien.'],
+ ['Programación defensiva','Validar entradas y usar aserciones.'],
+ ['Proceso de programación con pseudocódigo','Diseñar la rutina en pseudocódigo antes de codificar.'],
+ ['Pruebas del desarrollador','Pruebas unitarias y de integración por quien escribe el código.'],
+ ['Depuración científica','Hipótesis, experimento, confirmación.'],
+ ['Refactorización','Mejorar el diseño sin cambiar el comportamiento, en pasos pequeños.'],
+ ['Integración incremental','Integrar poco a poco para localizar defectos rápido.'],
+ ['Listas de verificación','Checklists al final de cada capítulo como guía de revisión.']],{ax:['calidad']});
+T('b_rd','Rapid Development','obra','mcconnell',{y:1996,ref:'mccm',d:'1996. Cómo acortar cronogramas sin caer en los atajos que los alargan.'});
+T('c_4pil','Cuatro pilares del desarrollo rápido','concepto','b_rd',{ax:['plan'],d:'La velocidad sostenible se apoya en cuatro pilares, en este orden.'});
+L('c_4pil','Pilar',[
+ ['Evitar los errores clásicos',''],['Aplicar los fundamentos del desarrollo','Gestión, técnica y calidad.'],['Gestionar los riesgos',''],['Prácticas orientadas al cronograma','Solo después de los tres anteriores.']],{ax:['plan']});
+T('c_err','36 errores clásicos','concepto','b_rd',{ax:['plan','personas'],ref:'mccm',d:'Errores cometidos tan a menudo y por tantos que sus consecuencias son predecibles y evitables. Divididos en cuatro dimensiones.',
+ f:'Los errores clásicos seducen precisamente porque parecen atajos.',r:['Haz post-mortems para identificar los errores clásicos propios de tu organización.'],i:['Construx actualizó la lista en 2008 a 42 errores con una encuesta a más de 500 personas.']});
+T('c_err_p','Errores de personas','concepto','c_err',{ax:['personas'],ref:'mccm',d:'Errores 1–13.'});
+L('c_err_p','Error clásico',[['Motivación socavada'],['Personal débil'],['Empleados problemáticos sin control'],['Heroísmo'],['Agregar gente a un proyecto atrasado','Quizás el más clásico de todos (ley de Brooks).'],['Oficinas ruidosas y abarrotadas'],['Fricción entre desarrolladores y clientes'],['Expectativas irreales'],['Falta de patrocinio efectivo'],['Falta de compromiso de las partes interesadas'],['Falta de participación del usuario'],['Política por encima de sustancia'],['Pensamiento ilusorio (wishful thinking)']].map(a=>[a[0],a[1]||'']),{ax:['personas'],ref:'mccm'});
+T('c_err_pr','Errores de proceso','concepto','c_err',{ax:['plan'],ref:'mccm',d:'Errores 14–27.'});
+L('c_err_pr','Error clásico',[['Cronogramas demasiado optimistas'],['Gestión de riesgos insuficiente'],['Fallas de contratistas'],['Planificación insuficiente'],['Abandonar la planificación bajo presión'],['Perder tiempo en el inicio difuso (fuzzy front end)'],['Recortar actividades iniciales (requisitos, diseño)'],['Diseño inadecuado'],['Recortar el aseguramiento de calidad'],['Controles de gestión insuficientes'],['Convergencia prematura o demasiado frecuente'],['Omitir tareas necesarias en las estimaciones'],['Planear ponerse al día más adelante'],['Programar a lo loco (code-like-hell)']].map(a=>[a[0],'']),{ax:['plan'],ref:'mccm'});
+T('c_err_pd','Errores de producto','concepto','c_err',{ax:['valor'],ref:'mccm',d:'Errores 28–32.'});
+L('c_err_pd','Error clásico',[['Sobredorado de requisitos'],['Crecimiento descontrolado de funcionalidades (feature creep)'],['Sobredorado por parte del desarrollador'],['Negociación tira y afloja (push-me, pull-me)'],['Desarrollo orientado a la investigación']].map(a=>[a[0],'']),{ax:['valor'],ref:'mccm'});
+T('c_err_t','Errores de tecnología','concepto','c_err',{ax:['calidad'],ref:'mccm',d:'Errores 33–36.'});
+L('c_err_t','Error clásico',[['Síndrome de la bala de plata'],['Sobreestimar el ahorro de nuevas herramientas o métodos'],['Cambiar de herramientas a mitad del proyecto'],['Falta de control automatizado del código fuente']].map(a=>[a[0],'']),{ax:['calidad'],ref:'mccm'});
+T('b_spsg','Software Project Survival Guide','obra','mcconnell',{y:1998,ref:'mcsg',d:'1997/98. Guía práctica para que proyectos medianos sobrevivan: planificación temprana, entrega por etapas y control. Aquí se nombra el "cono de incertidumbre".'});
+T('c_survtest','Prueba de supervivencia del proyecto','concepto','b_spsg',{ax:['riesgo'],d:'Cuestionario que puntúa requisitos, planificación, control del proyecto, gestión de riesgos y personal para estimar la probabilidad de éxito.',r:['Aplícala al inicio y al final de cada etapa; una puntuación baja es una alarma temprana.']});
+T('c_needs','Jerarquía de necesidades del proyecto','concepto','b_spsg',{ax:['personas'],d:'Como la pirámide de Maslow: primero supervivencia y seguridad (proyecto entregable, plan realista), luego pertenencia, estima y autorrealización del equipo.'});
+T('c_rights','Carta de derechos','concepto','b_spsg',{ax:['personas'],d:'Derechos explícitos del cliente (objetivos claros, estimaciones honestas, avance visible) y del equipo (objetivos y prioridades claras, tiempo para estimar, trabajar productivamente).'});
+T('c_staged','Entrega por etapas','concepto','b_spsg',{ax:['adapt','valor'],d:'Entregar funcionalidad en etapas, empezando por lo más importante, para reducir riesgo y mostrar avance.'});
+T('b_se','Software Estimation','obra','mcconnell',{y:2006,ref:'mcse',d:'2006. "Desmitificando el arte oscuro": técnicas, fuentes de error y comunicación de estimaciones.'});
+T('c_ecc','Estimación ≠ objetivo ≠ compromiso','concepto','b_se',{ax:['estim'],d:'Una estimación es una predicción analítica; un objetivo, un deseo del negocio; un compromiso, una promesa. Confundirlos es la raíz de muchos fracasos.',
+ f:'Si te piden una estimación, averigua si en realidad quieren un plan para alcanzar un objetivo.',r:['Cuando la estimación no alcanza el objetivo, negocia alcance o recursos, no la estimación.'],x:['Convertir el primer número en compromiso (caso Queensland).']});
+T('c_fuentes','Fuentes de error de estimación','concepto','b_se',{ax:['estim'],d:'Por qué fallan las estimaciones.'});
+L('c_fuentes','Fuente',[['Información imprecisa sobre el proyecto',''],['Procesos de desarrollo caóticos',''],['Actividades omitidas',''],['Sesgo optimista',''],['Subjetividad',''],['Precisión injustificada (más decimales que certeza)','']],{ax:['estim']});
+T('c_ccj','Contar, calcular, juzgar','concepto','b_se',{ax:['estim'],d:'Cuenta si puedes; calcula si no puedes contar; usa el juicio solo como último recurso.',r:['Cuenta cosas que se correlacionen con el tamaño: requisitos, historias, pantallas, casos de prueba.']});
+T('c_rangos','Rangos y calibración','concepto','b_se',{ax:['estim'],d:'Expresar estimaciones como rangos y calibrarlas con datos históricos (de la industria, de la organización y, mejor aún, del propio proyecto).',r:['Usa varias técnicas y compara.','Re-estima cuando el cono se estreche.']});
+T('c_asim','Penalización asimétrica','concepto','b_se',{ax:['estim','riesgo'],d:'Subestimar es más dañino que sobreestimar: genera planificación ineficaz, menos tiempo de calidad y más presión destructiva.'});
+
+/* =====================================================================
+   COHN
+   ===================================================================== */
+T('b_usa','User Stories Applied','obra','cohn',{y:2004,ref:'cohnusa',d:'2004. Cómo escribir, estimar y usar historias de usuario.'});
+T('c_hu','Historias de usuario','concepto','b_usa',{ax:['valor'],d:'"Como [rol] quiero [algo] para [beneficio]": requisitos centrados en el valor y la conversación.',f:'La tarjeta es un recordatorio para conversar, no la especificación.'});
+L('c_hu','Elemento',[
+ ['Las 3 C: tarjeta, conversación, confirmación','Idea de Ron Jeffries que Cohn adopta.'],
+ ['INVEST','Independiente, Negociable, Valiosa, Estimable, Pequeña (Small), Comprobable (Testable) — acrónimo de Bill Wake.'],
+ ['Roles de usuario y personas','Modelar distintos tipos de usuario antes de escribir historias.'],
+ ['Talleres de escritura de historias','Sesiones colaborativas para generar muchas historias rápido.'],
+ ['Épicas','Historias grandes que se dividen cuando se acercan a la implementación.'],
+ ['Pruebas de aceptación','Confirman cuándo la historia está terminada.'],
+ ['Señales de mal olor','Historias demasiado pequeñas, interdependientes, con sobredorado, demasiado detalle o interfaz demasiado pronto.']],{ax:['valor']});
+T('b_aep','Agile Estimating and Planning','obra','cohn',{y:2005,ref:'cohnaep',d:'2005. Estimación y planificación ágil: la planificación misma debe ser ágil.'});
+T('c_multi','Cebolla de planificación','concepto','b_aep',{ax:['plan','adapt'],d:'Planificar a distintos horizontes y niveles de detalle; los equipos ágiles se ocupan de las tres capas internas.'});
+L('c_multi','Nivel',[['Estrategia',''],['Portafolio',''],['Producto',''],['Release','Qué funcionalidades y cuándo, con velocidad.'],['Iteración','Tareas para las historias de la iteración.'],['Día','Coordinación diaria.']],{ax:['plan']});
+T('c_sp','Puntos de historia y días ideales','concepto','b_aep',{ax:['estim'],d:'Estimar el tamaño (puntos, relativo) separado de la duración (derivada de la velocidad).',r:['No conviertas puntos a horas; mide la velocidad.']});
+T('c_pp','Planning poker','concepto','b_aep',{ax:['estim','personas'],ref:'ppwiki',d:'Cada estimador elige una carta en secreto; se revelan a la vez, se discuten los extremos y se repite hasta converger. Evita el anclaje.'});
+T('c_tecest','Técnicas de estimación','concepto','b_aep',{ax:['estim'],d:'Opinión experta, analogía (triangulación) y desagregación.'});
+T('c_prior','Priorización','concepto','b_aep',{ax:['valor'],d:'Cuatro factores para priorizar.'});
+L('c_prior','Factor',[['Valor financiero',''],['Costo',''],['Conocimiento nuevo que genera',''],['Riesgo que reduce','']],{ax:['valor']});
+T('c_whyfail','Por qué falla la planificación tradicional','concepto','b_aep',{ax:['plan'],d:'Seis causas recurrentes.'});
+L('c_whyfail','Causa',[['Se planifican actividades, no funcionalidades',''],['Los retrasos se transmiten; los adelantos no',''],['La multitarea causa más demoras',''],['Las funcionalidades no se desarrollan por prioridad',''],['Se ignora la incertidumbre',''],['Las estimaciones se vuelven compromisos','']],{ax:['plan']});
+T('c_buffer','Buffers y seguimiento','concepto','b_aep',{ax:['plan','riesgo'],d:'Buffers de funcionalidad y de cronograma; seguimiento con velocidad y gráficos de burndown.'});
+T('b_swa','Succeeding with Agile','obra','cohn',{y:2009,ref:'cohnswa',d:'2009. Cómo adoptar y escalar Scrum en organizaciones reales.'});
+T('c_pir','Pirámide de automatización de pruebas','concepto','b_swa',{ax:['calidad'],ref:'fowler',d:'Muchas pruebas unitarias en la base, menos de servicio y pocas de interfaz en la cima.',x:['El "cono de helado" invertido: casi todo probado por la interfaz.']});
+L('c_pir','Capa',[['Interfaz de usuario (pocas)','Lentas y frágiles.'],['Servicio (intermedia)','La capa "olvidada": prueba la lógica sin la interfaz.'],['Unidad (base)','Rápidas, baratas y precisas.']],{ax:['calidad'],ref:'mgs'});
+T('c_adaptm','Modelo ADAPT','concepto','b_swa',{ax:['personas','adapt'],d:'Pasos para el cambio organizacional hacia lo ágil.'});
+L('c_adaptm','Paso',[['Conciencia (Awareness)','de que el proceso actual no funciona.'],['Deseo (Desire)','de adoptar lo ágil.'],['Habilidad (Ability)','para trabajar de forma ágil.'],['Promover (Promote)','los éxitos tempranos.'],['Transferir (Transfer)','las implicaciones al resto de la organización.']],{ax:['personas']});
+T('c_deep','Backlog DEEP','concepto','b_swa',{ax:['valor'],d:'Detallado adecuadamente, Estimado, Emergente y Priorizado (Cohn y Pichler).'});
+T('c_featteam','Equipos de funcionalidad','concepto','b_swa',{ax:['personas'],d:'Preferir equipos que entregan funcionalidades completas de punta a punta frente a equipos por componente.'});
+
+/* =====================================================================
+   PRECURSORES · obras y conceptos
+   ===================================================================== */
+T('b_mmm','The Mythical Man-Month','obra','brooks',{y:1975,ref:'brooks',d:'1975 (ed. aniversario 1995). Ensayos sobre la gestión del OS/360.'});
+T('c_brooks','Ley de Brooks','concepto','b_mmm',{ax:['personas','estim'],d:'Agregar personas a un proyecto atrasado lo atrasa más: aumentan la incorporación y los canales de comunicación.',f:'Personas y meses no son intercambiables.'});
+T('c_commch','Canales de comunicación n(n−1)/2','concepto','b_mmm',{ax:['personas'],d:'Con n personas hay n(n−1)/2 canales: el costo de coordinación crece cuadráticamente.'});
+T('c_integ','Integridad conceptual','concepto','b_mmm',{ax:['calidad'],d:'Un sistema debe reflejar un único conjunto coherente de ideas de diseño; mejor omitir funciones que romper la coherencia.'});
+T('c_throw','Planifica desechar uno','concepto','b_mmm',{ax:['adapt'],d:'La primera versión enseña; planifica aprender de ella (antecedente de prototipos e iteración).'});
+T('b_nsb','No Silver Bullet (1986)','obra','brooks',{y:1986,ref:'nsb',d:'Ensayo de 1986: no hay un único avance que multiplique por diez la productividad en una década.'});
+T('c_esencial','Complejidad esencial vs. accidental','concepto','b_nsb',{ax:['calidad','riesgo'],d:'La dificultad esencial (complejidad, conformidad, cambiabilidad, invisibilidad) no la eliminan las herramientas; solo la accidental.'});
+T('b_peopleware','Peopleware','obra','demarco',{y:1987,ref:'peopleware',d:'1987 (3.ª ed. 2013). Productividad, entorno y equipos.'});
+T('c_sociol','Los problemas son sociológicos','concepto','b_peopleware',{ax:['personas'],d:'Los mayores problemas de los proyectos no son técnicos sino de personas y organización.'});
+T('c_flow','Entorno y estado de flujo','concepto','b_peopleware',{ax:['personas'],d:'Las interrupciones y el ruido destruyen el estado de concentración profunda; el entorno físico importa.'});
+T('c_jelled','Equipos cohesionados','concepto','b_peopleware',{ax:['personas'],d:'Equipos que "cuajan" producen más que la suma de sus miembros; muchas prácticas de gestión los destruyen sin querer ("teamicidio").'});
+T('b_scrumguide','La Guía de Scrum (2020)','obra','scrumorg',{y:2020,ref:'scrum',d:'Marco ligero para generar valor mediante soluciones adaptativas a problemas complejos.'});
+T('c_scrum','Estructura de Scrum','concepto','b_scrumguide',{ax:['adapt'],d:'Empirismo y pensamiento lean.'});
+L('c_scrum','Elemento',[
+ ['3 pilares: transparencia, inspección, adaptación',''],
+ ['5 valores: compromiso, foco, apertura, respeto, coraje',''],
+ ['3 responsabilidades: Product Owner, Scrum Master, Developers',''],
+ ['5 eventos: Sprint, Planning, Daily, Review, Retrospective',''],
+ ['3 artefactos y sus compromisos','Product Backlog (objetivo del producto), Sprint Backlog (objetivo del sprint), Incremento (definición de terminado).']],{ax:['adapt']});
+T('c_manif','Manifiesto Ágil','concepto','agileall',{ax:['adapt','valor'],ref:'manif',y:2001,d:'Cuatro valores y doce principios (2001). Valora lo de la izquierda más que lo de la derecha, sin despreciar lo segundo.'});
+L('c_manif','Valor',[
+ ['Individuos e interacciones sobre procesos y herramientas',''],
+ ['Software funcionando sobre documentación extensiva',''],
+ ['Colaboración con el cliente sobre negociación contractual',''],
+ ['Respuesta ante el cambio sobre seguir un plan','']],{ax:['adapt']});
+T('c_delphi','Método Delphi','concepto','rand',{ax:['estim'],d:'Pronóstico por rondas de expertos anónimos con retroalimentación.'});
+T('c_gqm','GQM (Meta–Pregunta–Métrica)','concepto','basili',{ax:['estim','calidad'],d:'Definir metas de medición, derivar preguntas y solo entonces métricas.'});
+
+/* ---------- EJES ---------- */
+for(const k in AXES)T('ax_'+k,AXES[k].n,'eje',null,{axk:k,d:AXES[k].d});
+/* ---------- CASOS ---------- */
+const CASES=[
+ ['hc','HealthCare.gov','2013','#1f4e8c','pmbok','Nadie tenía la visión del sistema completo: cada contrato se gestionaba por separado.','Más de 55 contratistas, fecha fija y pruebas integrales tardías. Un equipo de rescate pequeño con monitoreo, reunión diaria de errores y un responsable único de integración lo estabilizó.',['p_hol','d_gob','c_brooks','c_err_p']],
+ ['dia','Equipaje de Denver','1995','#8B5A2B','boehm','Se comprometió la fecha cuando la incertidumbre técnica era máxima.','Sistema automático sin precedentes; el alcance creció en obra. 16 meses de retraso; el sistema se abandonó en 2005.',['c_espiral','c_cono','d_rie','d_cro','c_socio']],
+ ['ari','Ariane 5 · Vuelo 501','1996','#3a3f4a','sommerville','Un respaldo idéntico falla igual, y lo reutilizado no hereda la validez de su contexto anterior.','Software de navegación reutilizado del Ariane 4; un desbordamiento de conversión hizo fallar ambos sistemas.',['c_reuso','c_conf','p_cal','d_rie']],
+ ['qh','Nómina de Queensland Health','2010','#a77a07','mcconnell','Un precio temprano sin rango se convirtió en compromiso, y se subestimó la complejidad de las reglas de negocio.','Miles de reglas de nómina; el costo final multiplicó varias veces la cifra inicial.',['c_ecc','d_fin','d_alc','c_cono']],
+ ['fbi','FBI: de VCF a Sentinel','2005','#2d3a4f','cohn','Entregar en grande al final escondía los problemas hasta que era tarde para corregirlos.','VCF se canceló; Sentinel se rescató con un equipo pequeño e iteraciones ágiles.',['c_tail','p_val','c_multi','c_hu']],
+ ['kn','Knight Capital','2012','#5a1a1a','pressman','Sin gestión de configuración ni plan de contingencia, un solo servidor desactualizado bastó.','Un despliegue incompleto reactivó código obsoleto; pérdidas de cientos de millones en minutos.',['c_scm','c_rmmm','d_rie','p_cal']],
+ ['sp','El «modelo Spotify»','2012','#1e7a4a','mcconnell','La estructura no reemplaza la cultura: alineación + autonomía requiere propósito claro y liderazgo.','Muchas empresas copiaron squads y tribus sin la cultura que los sostenía.',['p_emp','p_lid','c_tail','c_jelled']],
+ ['mco','Mars Climate Orbiter','1999','#9c3d12','sommerville','El error estaba en la interfaz entre equipos, el lugar que nadie sentía como propio.','Un equipo usaba unidades imperiales y otro métricas; la sonda se perdió.',['c_socio','d_pi','c_rev','d_rie']],
+ ['nhs','NHS · NPfIT','2002','#1f5fa8','pmbok','Las partes interesadas que usarían el sistema no tuvieron voz en él.','El mayor programa civil de TI del Reino Unido se desmanteló tras años de sobrecostos.',['d_pi','p_hol','c_thw','c_req']]
+];
+for(const c of CASES)T('k_'+c[0],c[1],'caso',null,{y:+c[2],color:c[3],feat:c[4],d:c[5],ctx:c[6],ref:'perfil'});
+
+/* =====================================================================
+   ENLACES TRANSVERSALES  [origen, destino, relación, evidencia, fuentes]
+   doc = respaldado por fuente · conc = vínculo conceptual/pedagógico
+   ===================================================================== */
+const XL=[
+ ['c_cono','b_spsg','McConnell lo nombra «cono de incertidumbre»','doc',['wcone','rework']],
+ ['c_cono','b_rd','McConnell publica el diagrama citando a Boehm','doc',['bossavit']],
+ ['c_cono','b_se','McConnell lo retoma como eje de la estimación','doc',['armour','wcone']],
+ ['c_cono','b_aep','Cohn abre su libro con el cono de Boehm','doc',['cohnaep']],
+ ['c_delphi','c_wbd','Boehm adapta Delphi al software (Wideband)','doc',['ppwiki','mindtools']],
+ ['c_wbd','c_pp','Planning poker es una variante de Wideband Delphi','doc',['ppwiki','mindtools']],
+ ['grenning','c_pp','Define y nombra la técnica (2002)','doc',['ppwiki','mindtools']],
+ ['c_w5hh','c_4p','Pressman adopta el W5HH como plan mínimo','doc',['perfil','w5hh']],
+ ['c_espiral','c_modelos','Modelo evolutivo enseñado por Pressman','doc',['press','spiral88']],
+ ['c_espiral','c_act','Modelo de proceso enseñado por Sommerville','doc',['somm','spiral88']],
+ ['c_brooks','c_err_p','«Agregar gente a un proyecto atrasado» es un error clásico','doc',['mccm','brooks']],
+ ['agileall','cohn','Cohn es miembro fundador','doc',['mgs']],
+ ['agileall','b_apg','Coedita la guía con el PMI','doc',['perfil']],
+ ['turner','b_bad','Coautor','doc',['btbook']],
+ ['basili','b_defect','Coautor','doc',['bb01']],
+ ['basili','c_met','GQM, métrica orientada a metas','conc',['bb01']],
+ ['c_gqm','c_met','Pressman presenta GQM','conc',['press']],
+ ['c_cocomo','c_estimP','Pressman presenta COCOMO II como modelo empírico','doc',['press']],
+ ['c_cocomo','c_cocomo2','Evolución del modelo','doc',['cocomo2']],
+ ['c_cocomo2','c_plansom','Sommerville enseña COCOMO II','doc',['somm']],
+ ['c_cocomo','c_rangos','Modelos paramétricos calibrados con datos','conc',['mcse']],
+ ['c_defcost','b_defect','Boehm actualiza el hallazgo con datos (2001)','doc',['bb01']],
+ ['c_defcost','c_rev','Justifica revisiones tempranas','conc',['bb01']],
+ ['c_defcost','c_costcal','La falla externa es la más cara','conc',['press']],
+ ['c_defcost','c_prereq','Mide dos veces, corta una','conc',['mccc']],
+ ['b_defect','c_rev','Revisiones detectan ~60 % de defectos','doc',['bb01']],
+ ['c_home','c_hib','Mismo argumento: combinar ágil y plan según contexto','conc',['bt03','somm']],
+ ['c_home','c_enf','Antecedente del enfoque híbrido','conc',['bt03','lt8']],
+ ['c_concl','c_tail','«Construir el método hacia arriba» ≈ tailoring','conc',['btbook','pmi8']],
+ ['c_top10','d_rie','La lista alimenta la identificación de riesgos','conc',['risk91']],
+ ['c_top10','c_peligro','Síntomas comparables en Pressman','conc',['press']],
+ ['c_top10','c_err_pr','Cronogramas irreales: riesgo #2 = error clásico #14','conc',['risk91','mccm']],
+ ['c_espiral','c_top10','Cada vuelta ataca el riesgo más alto','doc',['spiral88','risk91']],
+ ['c_re','c_resp','Priorizar antes de responder','conc',['usc02']],
+ ['c_rmmm','c_resp','Mitigación y contingencia','conc',['press']],
+ ['c_procrisk','c_triesgo','Proceso equivalente en Sommerville','conc',['somm','risk91']],
+ ['c_triesgo','d_rie','Tipos y proceso del dominio de riesgos','conc',['somm']],
+ ['c_thw','d_pi','Gana-gana con las partes interesadas','conc',['btbook']],
+ ['c_socio','p_hol','Ver el sistema completo','conc',['somm']],
+ ['c_socio','d_pi','Las personas son parte del sistema','conc',['somm']],
+ ['c_ecc','d_fin','No convertir un precio temprano en compromiso','conc',['mcse']],
+ ['c_ecc','d_cro','Fechas comprometidas con rangos','conc',['mcse']],
+ ['c_cono','c_ecc','Por eso estimar no es comprometer','doc',['rework']],
+ ['c_whyfail','c_ecc','"Las estimaciones se vuelven compromisos"','conc',['cohnaep','mcse']],
+ ['c_hu','c_req','Técnica ágil de requisitos','conc',['somm']],
+ ['c_hu','c_personas','Sommerville usa historias en productos','doc',['sommesp']],
+ ['c_hu','p_val','Cada historia expresa un beneficio','conc',['cohnusa']],
+ ['c_pir','p_cal','Calidad incorporada mediante automatización','conc',['fowler']],
+ ['c_pir','c_devops','Automatización de pruebas en DevOps','conc',['sommesp']],
+ ['c_sqa','p_cal','Calidad incorporada al proceso','conc',['press']],
+ ['c_constr','p_cal','Calidad desde el código','conc',['mccc']],
+ ['c_err_pr','c_somb','"Recortar QA" vs. actividades sombrilla','conc',['mccm','press']],
+ ['c_multi','c_tail','Planificar al nivel de detalle adecuado','conc',['cohnaep']],
+ ['c_sp','c_rangos','Tamaño relativo separado de la duración','conc',['cohnaep']],
+ ['c_staged','c_ciclos','Entrega incremental','conc',['mcsg']],
+ ['c_staged','c_multi','Release por etapas','conc',['mcsg']],
+ ['c_manif','c_ciclos','Fundamento del ciclo ágil','doc',['manif','pmi8']],
+ ['c_scrum','c_rolesag','Roles de un equipo ágil','conc',['scrum']],
+ ['c_scrum','c_deep','Product Backlog','conc',['scrum','cohnswa']],
+ ['scrumorg','b_swa','Cohn adopta y escala Scrum','conc',['cohnswa']],
+ ['c_throw','c_modelos','Antecedente de prototipos','conc',['brooks','press']],
+ ['c_throw','c_espiral','Iterar para aprender','conc',['brooks']],
+ ['c_esencial','c_err_t','Síndrome de la bala de plata','doc',['nsb','mccm']],
+ ['c_esencial','c_concl','Ningún método es bala de plata','conc',['btbook']],
+ ['c_commch','c_brooks','Explica la ley','doc',['brooks']],
+ ['c_sociol','c_gpers','Personas como activo central','conc',['peopleware','somm']],
+ ['c_flow','c_err_p','"Oficinas ruidosas" es un error clásico','doc',['mccm','peopleware']],
+ ['c_jelled','p_emp','Equipos empoderados','conc',['peopleware']],
+ ['c_servant','p_emp','Liderazgo que habilita','conc',['pmi8']],
+ ['c_featteam','c_rolesag','Equipo multifuncional','conc',['cohnswa']],
+ ['c_complex','c_esencial','Gestionar lo que no se puede eliminar','conc',['mccc','nsb']],
+ ['c_integ','c_hooker','"Mantén la visión"','conc',['press','brooks']],
+ ['c_reuso','c_hooker','Planear la reutilización','conc',['press']],
+ ['c_prior','p_val','Priorizar por valor','conc',['cohnaep']]
+];
+/* ---------- GUÍA DEL PROYECTO (10 fases) ---------- */
+const GUIDE=[
+ {n:'1 · Concepción y justificación',obj:'Decidir si el proyecto debe existir y qué valor debe producir.',
+  q:['¿Por qué se desarrolla el sistema? (W5HH)','¿Quiénes ganan y qué necesita cada uno para ganar? (Theory W)','¿Cómo mediremos el beneficio, no solo el entregable?'],
+  rec:[['c_w5hh','Responde las 7 preguntas en una página antes de comprometer recursos.'],['p_val','Define métricas de beneficio y quién las mide.'],['c_thw','Lista las condiciones de victoria de cada parte interesada.'],['c_prodvsproy','Si es un producto, escribe la visión: qué, para quién, por qué y en qué se diferencia.'],['p_hol','Dibuja el sistema completo: otros sistemas, contratos e interfaces.']],
+  ev:['Política por encima de sustancia (error clásico).','Arrancar sin patrocinio efectivo.'],art:['Caso de negocio','Visión de producto','Mapa de partes interesadas'],nodes:['c_w5hh','p_val','c_thw','c_prodvsproy','p_hol','d_gob','d_pi'],casos:['k_hc','k_nhs']},
+ {n:'2 · Elección del enfoque',obj:'Elegir y adaptar el ciclo de vida según el contexto, no por moda.',
+  q:['¿Qué tan estables son los requisitos?','¿Qué tan crítico es el sistema? ¿Hay regulación?','¿Qué experiencia y cultura tiene el equipo?'],
+  rec:[['c_home','Califica los 5 factores (tamaño, criticidad, dinamismo, personal, cultura).'],['c_5pasos','Aplica el método de 5 pasos basado en riesgo para decidir la mezcla.'],['c_hib','Contrasta con los factores de Sommerville (vida útil, distribución, herramientas).'],['c_tail','Documenta qué prácticas usarás y por qué.'],['c_ciclos','Elige ciclo predictivo, iterativo, incremental o ágil.']],
+  ev:['Copiar un marco (Scrum, "modelo Spotify") sin adaptarlo.','Síndrome de la bala de plata.'],art:['Declaración de enfoque y adaptación'],nodes:['c_home','c_5pasos','c_hib','c_tail','c_enf','c_ciclos','c_concl','c_manif'],casos:['k_sp','k_fbi']},
+ {n:'3 · Requisitos y alcance',obj:'Descubrir lo que realmente se necesita y controlar cómo cambia.',
+  q:['¿Estamos construyendo las funciones correctas y la interfaz correcta?','¿Qué requisitos no funcionales son críticos?','¿Cómo se aprobarán los cambios?'],
+  rec:[['c_req','Obtén, especifica, valida y gestiona el cambio de requisitos.'],['c_hu','Escribe historias INVEST y confírmalas con pruebas de aceptación.'],['c_personas','Usa personas y escenarios para descubrir funcionalidades.'],['c_top10','Riesgos #3 y #4: prototipa funciones e interfaz con usuarios reales.'],['d_alc','Define un umbral explícito de control de cambios.']],
+  ev:['Sobredorado de requisitos y feature creep.','Recortar actividades iniciales.'],art:['Backlog o especificación','Criterios de aceptación'],nodes:['c_req','c_hu','c_personas','c_top10','d_alc','c_err_pd','c_conf'],casos:['k_nhs','k_qh']},
+ {n:'4 · Estimación y presupuesto',obj:'Producir estimaciones honestas, en rangos, separadas de los objetivos y compromisos.',
+  q:['¿En qué parte del cono de incertidumbre estamos?','¿Es una estimación, un objetivo o un compromiso?','¿Qué datos históricos tenemos?'],
+  rec:[['c_cono','No comprometas fechas en la parte ancha del cono.'],['c_ccj','Cuenta, calcula y solo después juzga.'],['c_ecc','Si la estimación no alcanza el objetivo, negocia alcance, no la estimación.'],['c_cocomo2','Usa un modelo paramétrico y compara con el juicio experto.'],['c_pp','Estima en equipo con planning poker o Wideband Delphi.'],['c_rangos','Presenta rangos con supuestos; calibra con datos propios.']],
+  ev:['Cronogramas demasiado optimistas.','Omitir tareas en la estimación.','Precisión injustificada.'],art:['Estimación con rango y supuestos','Presupuesto con reservas'],nodes:['c_cono','c_ccj','c_ecc','c_cocomo2','c_pp','c_rangos','c_fuentes','c_asim','d_fin','c_sp'],casos:['k_qh','k_dia']},
+ {n:'5 · Planificación y cronograma',obj:'Planificar al nivel de detalle adecuado y con compuertas de decisión.',
+  q:['¿Qué se entrega primero y por qué?','¿Qué hitos verifican avance real?','¿Qué buffers tenemos?'],
+  rec:[['c_multi','Planifica release, iteración y día; no todo al mismo detalle.'],['c_staged','Entrega por etapas, lo más importante primero.'],['c_espiral','Usa hitos ancla LCO/LCA/IOC como compuertas.'],['c_buffer','Protege el plan con buffers de alcance y de cronograma.'],['c_whyfail','Planifica funcionalidades, no actividades.']],
+  ev:['Planificación insuficiente o abandonada bajo presión.','Planear ponerse al día más adelante.'],art:['Plan de release','Calendario con hitos','Línea base'],nodes:['c_multi','c_staged','c_espiral','c_buffer','c_whyfail','d_cro','c_plansom','g_pmf'],casos:['k_dia','k_fbi']},
+ {n:'6 · Gestión de riesgos',obj:'Atacar los riesgos más altos antes de que ataquen al proyecto.',
+  q:['¿Cuál es nuestro top 10 de riesgos hoy?','¿Cuál tiene mayor exposición (P × L)?','¿Qué haremos si ocurre?'],
+  rec:[['c_top10','Arranca con la lista de Boehm y su técnica para cada riesgo.'],['c_re','Prioriza por exposición al riesgo y por apalancamiento.'],['c_rmmm','Escribe mitigación, monitoreo y contingencia para cada riesgo sobre la línea de corte.'],['c_resp','Elige respuesta: evitar, mitigar, transferir, aceptar o escalar.'],['c_survtest','Aplica la prueba de supervivencia en cada etapa.']],
+  ev:['Gestión de riesgos insuficiente.','Gestión reactiva ("bombero").'],art:['Registro de riesgos','Hojas RIS'],nodes:['c_top10','c_re','c_rmmm','c_resp','c_procrisk','c_triesgo','c_survtest','c_peligro','d_rie'],casos:['k_dia','k_kn','k_ari']},
+ {n:'7 · Equipo y personas',obj:'Crear las condiciones para que el equipo rinda y se mantenga.',
+  q:['¿Tenemos las habilidades necesarias?','¿El entorno permite concentración?','¿Quién decide qué?'],
+  rec:[['c_gpers','Gestiona con consistencia, respeto, inclusión y honestidad.'],['c_brooks','No agregues gente tarde; si lo haces, planifica la incorporación.'],['c_flow','Protege el tiempo de concentración del equipo.'],['p_emp','Delega decisiones al nivel que tiene la información.'],['c_servant','Lidera eliminando impedimentos.'],['c_featteam','Organiza equipos que entreguen funcionalidades completas.']],
+  ev:['Heroísmo, motivación socavada, oficinas ruidosas.','Personal débil o problemáticos sin control.'],art:['Matriz de roles y responsabilidades','Acuerdos de trabajo'],nodes:['c_gpers','c_brooks','c_commch','c_flow','c_jelled','p_emp','p_lid','c_servant','c_featteam','c_err_p','c_needs'],casos:['k_hc','k_sp']},
+ {n:'8 · Ejecución y calidad',obj:'Construir con calidad incorporada desde el código hasta el despliegue.',
+  q:['¿Qué significa "terminado"?','¿Dónde se detectan los defectos?','¿Está todo bajo control de versiones?'],
+  rec:[['c_somb','Planifica SQA, SCM y revisiones como trabajo real.'],['c_rev','Haz revisiones entre pares con listas de verificación.'],['b_defect','Corrige temprano: el retrabajo evitable consume 40–50 % del esfuerzo.'],['c_constr','Aplica las prácticas de construcción de Code Complete.'],['c_pir','Automatiza pruebas siguiendo la pirámide.'],['c_scm','Ningún despliegue sin versión etiquetada y verificada.']],
+  ev:['Recortar el aseguramiento de calidad.','Programar a lo loco.','Falta de control de código fuente.'],art:['Definición de terminado','Plan de calidad','Pipeline CI/CD'],nodes:['c_somb','c_sqa','c_scm','c_rev','b_defect','c_constr','c_complex','c_pir','c_devops','p_cal','c_costcal'],casos:['k_kn','k_ari','k_mco']},
+ {n:'9 · Seguimiento y control',obj:'Ver el avance real a tiempo y actuar con datos.',
+  q:['¿Cuál es nuestra velocidad real?','¿Las métricas responden preguntas de negocio?','¿Qué señales de peligro vemos?'],
+  rec:[['c_met','Elige métricas con GQM: meta, pregunta, métrica.'],['c_buffer','Sigue velocidad y burndown; consume buffers con criterio.'],['c_peligro','Revisa las 10 señales de peligro en cada hito.'],['c_cono','Re-estima a medida que el cono se estrecha.'],['d_gob','Escala con datos según los umbrales acordados.']],
+  ev:['Controles de gestión insuficientes.','Convergencia prematura.'],art:['Tablero de indicadores','Informe de estado'],nodes:['c_met','c_gqm','c_buffer','c_peligro','c_cono','d_gob','g_pmd','c_survtest'],casos:['k_hc','k_fbi']},
+ {n:'10 · Entrega, cierre y aprendizaje',obj:'Entregar valor, transferir y convertir la experiencia en mejora.',
+  q:['¿Se lograron los beneficios esperados?','¿Qué errores clásicos cometimos?','¿Qué cambiaremos en el proceso?'],
+  rec:[['g_pmf','Cierra formalmente: transfiere, libera recursos y captura lecciones.'],['c_err','Haz un post-mortem buscando errores clásicos propios.'],['b_7p','Comprométete con la mejora del proceso (principio 7 de Boehm).'],['p_sos','Evalúa sostenibilidad y mantenibilidad del resultado.'],['c_throw','Lo aprendido en esta versión alimenta la siguiente.']],
+  ev:['Cerrar sin medir beneficios.','Repetir los mismos errores en el siguiente proyecto.'],art:['Informe de cierre','Lecciones aprendidas','Plan de mejora'],nodes:['g_pmf','c_err','b_7p','p_sos','c_throw','c_marco','p_val'],casos:['k_nhs','k_sp']}
+];
+
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+
+/* =========================================================
+   1. ESTRUCTURA DERIVADA
+   ========================================================= */
+const byId=IDX, KIDS={}; NODES.forEach(n=>KIDS[n.id]=[]);
+NODES.forEach(n=>{if(n.p){if(!byId[n.p])console.warn('padre inexistente',n.id,n.p);else KIDS[n.p].push(n.id)}});
+const PREC='#64748b', WHITEC=new THREE.Color('#fff');
+function rootOf(n){while(n.p)n=byId[n.p];return n}
+function anc(id){const a=[];let n=byId[id];while(n&&n.p){n=byId[n.p];a.unshift(n.id)}return a}
+NODES.forEach(n=>{
+ const r=rootOf(n);
+ if(n.t==='caso'){n.own=n.feat}
+ else if(n.t==='eje'){n.own=null;n.color='#111827'}
+ else {n.own=r.t==='autor'?r.id:null; const base=n.own?AUT[n.own].color:PREC;
+  n.color=n.t==='elemento'?'#'+new THREE.Color(base).lerp(WHITEC,.3).getHexString():base}
+ n.depth=anc(n.id).length;
+ let q=n;while(q&&!q.ref)q=q.p?byId[q.p]:null; n.src=q?q.ref:null;
+});
+const ALL=[];
+NODES.forEach(n=>{if(n.p)ALL.push({s:n.p,t:n.id,k:'arbol',ev:'doc',rel:'contiene',refs:n.src?[n.src]:[]})});
+XL.forEach(x=>{if(!byId[x[0]]||!byId[x[1]]){console.warn('enlace roto',x);return}ALL.push({s:x[0],t:x[1],k:'influye',rel:x[2],ev:x[3],refs:x[4]})});
+CASES.forEach(c=>{ALL.push({s:'k_'+c[0],t:c[4],k:'caso',rel:'autor protagonista',ev:'doc',refs:['perfil']});c[7].forEach(x=>{if(!byId[x])console.warn('caso roto',x);else ALL.push({s:'k_'+c[0],t:x,k:'caso',rel:'lección',ev:'doc',refs:['perfil']})})});
+NODES.forEach(n=>{if(n.ax&&n.t!=='obra')n.ax.forEach(a=>ALL.push({s:n.id,t:'ax_'+a,k:'eje',rel:'eje',ev:'conc',refs:[]}))});
+ALL.forEach((e,i)=>e.i=i);
+const ADJ={};NODES.forEach(n=>ADJ[n.id]=[]);ALL.forEach(e=>{ADJ[e.s].push(e);ADJ[e.t].push(e)});
+const INFL=new Set();ALL.forEach(e=>{if(e.k==='influye'){INFL.add(e.s);INFL.add(e.t)}});
+const INFL_ANC=new Set();INFL.forEach(id=>{INFL_ANC.add(id);anc(id).forEach(a=>INFL_ANC.add(a))});
+const GSTEP={};GUIDE.forEach((g,i)=>{g.nodes.concat(g.rec.map(r=>r[0])).forEach(id=>{(GSTEP[id]=GSTEP[id]||new Set()).add(i)})});
+const descCount=id=>KIDS[id].reduce((s,k)=>s+1+descCount(k),0);
+
+/* =========================================================
+   2. ESCENA
+   ========================================================= */
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0xffffff,1);
+document.getElementById('stage').appendChild(renderer.domElement);
+const lr=new CSS2DRenderer({element:document.getElementById('labels')});lr.setSize(innerWidth,innerHeight);
+const scene=new THREE.Scene();scene.fog=new THREE.Fog(0xffffff,1100,2400);
+const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,1,6000);
+const HOME=new THREE.Vector3(0,120,860);camera.position.copy(HOME);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=.08;controls.autoRotate=true;controls.autoRotateSpeed=.4;controls.minDistance=60;controls.maxDistance=2200;
+scene.add(new THREE.HemisphereLight(0xffffff,0xd7dde6,1.25));const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(200,400,300);scene.add(dl);
+const world=new THREE.Group();scene.add(world);
+function tex(fn,s=128){const c=document.createElement('canvas');c.width=c.height=s;fn(c.getContext('2d'),s);return new THREE.CanvasTexture(c)}
+const GT=tex((g,s)=>{const r=g.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.35,'rgba(255,255,255,.5)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,s,s)});
+const DT=tex((g,s)=>{g.beginPath();g.arc(s/2,s/2,s*.4,0,7);g.fillStyle='#fff';g.fill()},64);
+const GEO={s:new THREE.SphereGeometry(1,24,16),ico:new THREE.IcosahedronGeometry(1,0),oct:new THREE.OctahedronGeometry(1,0),box:new THREE.BoxGeometry(1.5,1.5,1.5),ring:new THREE.TorusGeometry(1.55,.07,8,48),exp:new THREE.TorusGeometry(1.75,.1,6,40)};
+const meshes=[];
+NODES.forEach(n=>{
+ const col=new THREE.Color(n.color);let g=GEO.s,r;
+ const hk=KIDS[n.id].length>0;
+ switch(n.t){case'autor':r=16;break;case'precursor':r=9;break;case'obra':g=GEO.ico;r=7;break;case'eje':g=GEO.oct;r=11;break;case'caso':g=GEO.box;r=6.5;break;
+  case'concepto':r=hk?5.6:4.6;break;default:r=hk?3.6:2.8}
+ n.rad=r;
+ const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:col,transparent:true}));m.scale.setScalar(r);m.userData.n=n;world.add(m);n.mesh=m;meshes.push(m);
+ if(n.t==='autor'||n.t==='precursor'){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:GT,color:col,transparent:true,opacity:n.t==='autor'?.36:.16,depthWrite:false}));sp.scale.setScalar(n.t==='autor'?6:4);m.add(sp);n.glow=sp}
+ if(n.t==='autor'){const ring=new THREE.Mesh(GEO.ring,new THREE.MeshBasicMaterial({color:col}));m.add(ring);n.ring=ring}
+ if(hk&&n.t!=='autor'){const er=new THREE.Mesh(GEO.exp,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.55}));m.add(er);n.expRing=er}
+ const div=document.createElement('div');div.className='lbl '+n.t;const sp=document.createElement('span');div.appendChild(sp);
+ if(n.t==='autor'||n.t==='caso')sp.style.background=n.color;
+ const lo=new CSS2DObject(div);lo.center.set(.5,1);world.add(lo);n.lbl=lo;n.div=div;n.span=sp;
+ n.p3=new THREE.Vector3((Math.random()-.5)*500,(Math.random()-.5)*360,(Math.random()-.5)*500);n.v=new THREE.Vector3();
+});
+const selRing=new THREE.Mesh(new THREE.TorusGeometry(1,.06,8,64),new THREE.MeshBasicMaterial({color:0x0f172a}));selRing.visible=false;world.add(selRing);
+function lines(dashed){const cap=ALL.length*6;const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(cap),3));g.setAttribute('color',new THREE.BufferAttribute(new Float32Array(cap),3));
+ const m=dashed?new THREE.LineDashedMaterial({vertexColors:true,dashSize:4,gapSize:3,transparent:true,opacity:.9}):new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.9});
+ const l=new THREE.LineSegments(g,m);l.frustumCulled=false;world.add(l);return l}
+const LD=lines(false),LC=lines(true);
+const PMAX=600,pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(PMAX*3),3));pg.setAttribute('color',new THREE.BufferAttribute(new Float32Array(PMAX*3),3));
+const pts=new THREE.Points(pg,new THREE.PointsMaterial({size:7,map:DT,vertexColors:true,transparent:true,alphaTest:.3,depthWrite:false}));pts.frustumCulled=false;world.add(pts);
+
+/* =========================================================
+   3. ESTADO Y VISIBILIDAD
+   ========================================================= */
+const ST={mode:'red',autOn:Object.fromEntries(Object.keys(AUT).map(k=>[k,true])),
+ typeOn:{autor:true,precursor:true,obra:true,concepto:true,elemento:true,eje:true,caso:false},
+ doc:true,conc:true,eje:false,allLbl:false,sel:null,hover:null,path:null,pathE:new Set(),
+ exp:new Set(),root:null,scope:null,ext:new Set(),guide:null,level:2};
+function setLevel(l){ST.level=l;ST.exp.clear();
+ NODES.forEach(n=>{if(l>=1&&!n.p&&(n.t==='autor'||n.t==='precursor'))ST.exp.add(n.id);
+  if(l>=2&&n.t==='obra'&&KIDS[n.id].some(k=>byId[k].t==='concepto'))ST.exp.add(n.id);
+  if(l>=3&&KIDS[n.id].length)ST.exp.add(n.id)});
+ document.querySelectorAll('#lvl button').forEach(b=>b.classList.toggle('on',+b.dataset.l===l));refresh();kick(.8)}
+function ownerOn(n){const o=n.own||(rootOf(n).t==='autor'?rootOf(n).id:null);return !o||ST.autOn[o]}
+const VIS={};
+function computeVis(){
+ const memo={};
+ const tree=id=>{if(id in memo)return memo[id];const n=byId[id];let v=!n.p||(ST.exp.has(n.p)&&tree(n.p));return memo[id]=v};
+ NODES.forEach(n=>{
+  let v=ST.typeOn[n.t]&&ownerOn(n);
+  if(v){
+   if(ST.root){v=ST.scope.has(n.id)||ST.ext.has(n.id)}
+   else if(ST.mode==='infl'){v=n.t!=='eje'&&n.t!=='caso'&&(n.t==='autor'||INFL_ANC.has(n.id))}
+   else v=tree(n.id);
+  }
+  VIS[n.id]=v;
+ });
+}
+function proxy(id){let n=byId[id];while(n&&!VIS[n.id])n=n.p?byId[n.p]:null;return n?n.id:null}
+let DRAW=[];
+function buildDraw(){
+ const seen=new Set();DRAW=[];
+ ALL.forEach(e=>{
+  if(e.k==='arbol'){if(VIS[e.s]&&VIS[e.t])DRAW.push({...e,a:e.s,b:e.t,e});return}
+  if(ST.pathE.has(e.i)){if(VIS[e.s]&&VIS[e.t])DRAW.push({...e,a:e.s,b:e.t,e});return}
+  if(e.k==='eje'&&!(ST.eje||ST.mode==='ejes'))return;
+  if(e.k!=='eje'&&e.k!=='arbol'){if(e.ev==='doc'&&!ST.doc)return;if(e.ev==='conc'&&!ST.conc)return}
+  if(ST.mode==='infl'&&e.k!=='influye')return;
+  let a=proxy(e.s),b=proxy(e.t);if(!a||!b||a===b)return;
+  if(ST.root&&!(ST.scope.has(a)||ST.scope.has(b)))return;
+  if(e.k==='eje'&&byId[a].t!=='concepto'&&byId[a].t!=='elemento'&&!ST.root)return;
+  const key=a+'|'+b+'|'+e.k;if(seen.has(key))return;seen.add(key);
+  DRAW.push({...e,a,b,e,px:(a!==e.s||b!==e.t)});
+ });
+}
+function refresh(){
+ computeVis();buildDraw();
+ NODES.forEach(n=>{n.mesh.visible=VIS[n.id];
+  if(n.expRing)n.expRing.visible=VIS[n.id]&&!ST.exp.has(n.id)&&!(ST.root&&ST.ext.has(n.id));
+  const c=descCount(n.id);
+  n.span.textContent=(n.t==='caso'?n.n+' · '+n.y:n.n)+(KIDS[n.id].length&&!ST.exp.has(n.id)&&n.t!=='autor'?'  ＋'+c:'');
+ });
+ document.getElementById('nvis').textContent=NODES.filter(n=>VIS[n.id]).length+' / '+NODES.length+' nodos';
+ restyle();
+}
+function toggleExp(id,force){const has=ST.exp.has(id);const want=force===undefined?!has:force;
+ if(want){ST.exp.add(id);const p=byId[id].p3;KIDS[id].forEach(k=>{byId[k].p3.copy(p).add(new THREE.Vector3((Math.random()-.5)*14,(Math.random()-.5)*14,(Math.random()-.5)*14));byId[k].v.set(0,0,0)})}
+ else{const rm=x=>{ST.exp.delete(x);KIDS[x].forEach(rm)};rm(id)}
+ if(ST.root)buildScope();
+ refresh();kick(.6)}
+function reveal(id){const n=byId[id];
+ if(!ST.typeOn[n.t]){ST.typeOn[n.t]=true;const cb=document.getElementById('t_'+n.t);if(cb)cb.checked=true}
+ if(n.own&&!ST.autOn[n.own]){ST.autOn[n.own]=true;syncAut()}
+ if(ST.root&&!(ST.scope.has(id)||ST.ext.has(id)))exitRoot(false);
+ if(ST.mode==='infl'&&!INFL_ANC.has(id))setMode('red',false);
+ anc(id).forEach(a=>{if(!ST.exp.has(a)){ST.exp.add(a);const p=byId[a].p3;KIDS[a].forEach(k=>byId[k].p3.copy(p).addScalar((Math.random()-.5)*12))}});
+}
+
+/* entrar en una sub-red */
+function buildScope(){
+ const R=ST.root,S=new Set([R]);
+ const walk=id=>{if(!ST.exp.has(id))return;KIDS[id].forEach(k=>{S.add(k);walk(k)})};walk(R);
+ const ext=new Set();
+ S.forEach(id=>ADJ[id].forEach(e=>{if(e.k==='arbol'||e.k==='eje')return;const o=e.s===id?e.t:e.s;if(!S.has(o))ext.add(o)}));
+ if(byId[R].p)ext.add(byId[R].p);
+ ST.scope=S;ST.ext=ext;
+}
+function enterRoot(id){
+ ST.root=id;ST.path=null;ST.pathE.clear();ST.guide=null;
+ ST.exp.add(id);KIDS[id].forEach(k=>{if(KIDS[k].length&&KIDS[k].length<=12)ST.exp.add(k)});
+ buildScope();
+ const n=byId[id];NODES.forEach(x=>{x.anchor=null;x.ak=0;x.shell=0});
+ const off=n.p3.clone();NODES.forEach(x=>x.p3.sub(off));controls.target.sub(off);camera.position.sub(off);
+ n.anchor=new THREE.Vector3();n.ak=.08;
+ ST.ext.forEach(e=>byId[e].shell=260);
+ [...ST.scope].forEach(s=>{if(s!==id){byId[s].p3.copy(n.p3).addScalar((Math.random()-.5)*40)}});
+ ST.sel=null;refresh();crumbs();kick(1);renderDetail(n);
+ setTimeout(()=>flyToPos(new THREE.Vector3(),ST.scope.size>40?620:ST.scope.size>15?460:320),150);
+}
+function exitRoot(fly=true){ST.root=null;ST.scope=null;ST.ext.clear();applyMode(false);kick(.8);crumbs();if(fly)home()}
+function crumbs(){const c=document.getElementById('crumbs');
+ if(!ST.root){c.classList.remove('on');return}
+ const chain=anc(ST.root).concat([ST.root]);
+ c.innerHTML=`<button data-c="__">Mapa general</button>`+chain.map(id=>`<span>›</span><button data-c="${id}" ${id===ST.root?'class="cur"':''}>${esc(byId[id].n)}</button>`).join('')+`<button class="out" data-c="__">Salir ✕</button>`;
+ c.classList.add('on');
+ c.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{const v=b.dataset.c;if(v==='__')exitRoot();else if(v!==ST.root)enterRoot(v)});
+}
+
+/* resaltado */
+function focus(){
+ const s=new Set(),es=new Set();
+ if(ST.path){ST.path.forEach(x=>s.add(x));ST.pathE.forEach(i=>es.add(i));return{s,es,on:true}}
+ if(ST.guide!==null&&!ST.hover&&!ST.sel){const g=GUIDE[ST.guide];g.nodes.concat(g.rec.map(r=>r[0]),g.casos).forEach(x=>s.add(proxy(x)||x));DRAW.forEach(d=>{if(s.has(d.a)&&s.has(d.b))es.add(d)});return{s,es,on:true}}
+ const id=ST.hover||ST.sel;if(!id||!VIS[id])return{s,es,on:false};
+ s.add(id);DRAW.forEach(d=>{if(d.a===id||d.b===id){es.add(d);s.add(d.a);s.add(d.b)}});
+ return{s,es,on:true};
+}
+const GRAY=new THREE.Color('#94a3b8'),EJE=new THREE.Color('#cbd5e1'),INK=new THREE.Color('#0f172a'),RED=new THREE.Color('#E50914');
+function dcol(d){
+ if(d.k==='eje')return EJE.clone();
+ if(d.k==='influye'){const o=byId[d.s].own;return new THREE.Color(o?AUT[o].color:PREC)}
+ if(d.k==='caso')return new THREE.Color(byId[d.s].color).lerp(WHITEC,.3);
+ const o=byId[d.b].own;return new THREE.Color(o?AUT[o].color:PREC).lerp(GRAY,.45);
+}
+let F={s:new Set(),es:new Set(),on:false};
+function restyle(){
+ F=focus();
+ NODES.forEach(n=>{if(!VIS[n.id]){n.lbl.visible=false;return}
+  const hot=F.on&&F.s.has(n.id),dim=F.on&&!hot,ext=ST.root&&ST.ext.has(n.id);
+  n.mesh.material.opacity=dim?.12:ext?.5:1;
+  if(n.glow)n.glow.material.opacity=dim?.04:(n.t==='autor'?.36:.16);
+  const always=n.t==='autor'||n.t==='eje'||n.t==='precursor'||(n.t==='obra'&&ST.level<=1)||(n.t==='caso'&&ST.mode==='casos')||(ST.root&&ST.scope.has(n.id)&&byId[n.id].t!=='elemento')||(ST.root&&n.p===ST.root);
+  n.lbl.visible=ST.allLbl||always||hot;
+  n.div.classList.toggle('dim',dim);n.div.classList.toggle('hot',hot&&!always);n.div.classList.toggle('ext',!!ext);
+ });
+ [LD,LC].forEach(L=>{L.geometry.attributes.color.array.fill(1)});
+ DRAW.forEach((d,i)=>{const L=(d.ev==='doc')?LD:LC,c=L.geometry.attributes.color.array;let col=dcol(d);
+  if(F.on){if(F.es.has(d)||ST.pathE.has(d.i)){if(d.k!=='influye')col.lerp(INK,.35)}else col.lerp(WHITEC,.88)}
+  if(ST.pathE.has(d.i))col=RED.clone();
+  d.slot=i;for(const j of[0,3]){c[i*6+j]=col.r;c[i*6+j+1]=col.g;c[i*6+j+2]=col.b}});
+ LD.geometry.attributes.color.needsUpdate=LC.geometry.attributes.color.needsUpdate=true;
+}
+
+/* =========================================================
+   4. FUERZAS
+   ========================================================= */
+let alpha=1;const kick=a=>alpha=Math.max(alpha,a);
+const LEN={arbol:{obra:55,concepto:40,elemento:24,precursor:60},influye:100,eje:130,caso:90};
+const STR={arbol:.05,influye:.01,eje:.005,caso:.01};
+function applyMode(rekick=true){
+ NODES.forEach(n=>{n.anchor=null;n.ak=0;n.shell=0});
+ const ak=Object.keys(AUT);
+ ak.forEach((k,i)=>{const a=byId[k],ang=i/ak.length*Math.PI*2-Math.PI/2,R=ST.mode==='ejes'?110:330;a.anchor=new THREE.Vector3(Math.cos(ang)*R,Math.sin(i*1.7)*80,Math.sin(ang)*R);a.ak=.03});
+ Object.keys(AXES).forEach((k,i)=>{const a=byId['ax_'+k],ang=i/7*Math.PI*2,R=ST.mode==='ejes'?340:130;a.anchor=new THREE.Vector3(Math.cos(ang)*R,ST.mode==='ejes'?Math.cos(i*2.1)*90:0,Math.sin(ang)*R);a.ak=ST.mode==='ejes'?.04:.025});
+ NODES.forEach(n=>{if(n.t==='caso')n.shell=ST.mode==='casos'?280:470;if(n.t==='precursor')n.shell=430});
+ ST.typeOn.caso=ST.mode==='casos'?true:document.getElementById('t_caso').checked;
+ ST.typeOn.eje=ST.mode==='ejes'?true:document.getElementById('t_eje').checked;
+ refresh();if(rekick)kick(1);
+}
+const tmp=new THREE.Vector3();
+function simulate(){
+ if(alpha<.004)return;
+ const V=NODES.filter(n=>VIS[n.id]);const N=V.length;
+ for(let i=0;i<N;i++){const a=V[i];for(let j=i+1;j<N;j++){const b=V[j];
+  tmp.subVectors(a.p3,b.p3);let d2=tmp.lengthSq();if(d2>360000)continue;if(d2<1)d2=1;
+  const w=(a.t==='elemento'||b.t==='elemento')?.45:1;const f=1500*w*alpha/d2;tmp.multiplyScalar(f/Math.sqrt(d2));a.v.add(tmp);b.v.sub(tmp)}}
+ DRAW.forEach(d=>{const a=byId[d.a],b=byId[d.b];let L,k;
+  if(d.k==='arbol'){L=LEN.arbol[b.t]||40;k=STR.arbol}else{L=LEN[d.k];k=STR[d.k]}
+  if(ST.root){L*=d.k==='arbol'?1.9:1.3}
+  if(ST.mode==='ejes'&&d.k==='eje'){L=60;k=.03}
+  if(d.px){k*=.5}
+  tmp.subVectors(b.p3,a.p3);const dd=tmp.length()||1;tmp.multiplyScalar((dd-L)*k*alpha/dd);a.v.add(tmp);b.v.sub(tmp)});
+ V.forEach(n=>{
+  if(n.anchor){tmp.subVectors(n.anchor,n.p3).multiplyScalar(n.ak*alpha*3);n.v.add(tmp)}
+  if(n.shell){const d=n.p3.length()||1;n.v.addScaledVector(n.p3,(n.shell-d)/d*.02*alpha)}
+  n.v.addScaledVector(n.p3,-.0012*alpha);n.v.multiplyScalar(.82);n.p3.add(n.v)});
+ alpha*=.992;
+}
+
+/* =========================================================
+   5. RENDER
+   ========================================================= */
+const clock=new THREE.Clock();let tween=null;
+function frame(){
+ requestAnimationFrame(frame);const t=clock.getElapsedTime();simulate();
+ NODES.forEach(n=>{if(!VIS[n.id])return;n.mesh.position.copy(n.p3);n.lbl.position.copy(n.p3);
+  if(n.t==='caso'){n.mesh.rotation.x=t*.4;n.mesh.rotation.y=t*.6}
+  if(n.t==='eje'||n.t==='obra')n.mesh.rotation.y=t*.4;
+  if(n.ring){n.ring.lookAt(camera.position);n.ring.rotation.z=t}
+  if(n.expRing&&n.expRing.visible){n.expRing.lookAt(camera.position);n.expRing.material.opacity=.35+Math.sin(t*3+n.rad)*.2}
+  if(n.glow&&n.t==='autor')n.glow.scale.setScalar(6+Math.sin(t*2+n.p3.x)*.6)});
+ [LD,LC].forEach(L=>L.geometry.attributes.position.array.fill(0));
+ DRAW.forEach((d,i)=>{const L=d.ev==='doc'?LD:LC,p=L.geometry.attributes.position.array,o=i*6,a=byId[d.a].p3,b=byId[d.b].p3;
+  p[o]=a.x;p[o+1]=a.y;p[o+2]=a.z;p[o+3]=b.x;p[o+4]=b.y;p[o+5]=b.z});
+ LD.geometry.attributes.position.needsUpdate=LC.geometry.attributes.position.needsUpdate=true;LC.computeLineDistances();
+ // partículas: influencias documentadas (o la ruta)
+ const pp=pg.attributes.position.array,pc=pg.attributes.color.array;let k=0;
+ const fid=ST.hover||ST.sel;
+ DRAW.forEach(d=>{if(k>=PMAX-4)return;
+  const onPath=ST.pathE.has(d.i);
+  if(ST.path&&!onPath)return;
+  if(!ST.path&&!(d.k==='influye'&&d.ev==='doc'))return;
+  if(!ST.path&&fid&&d.a!==fid&&d.b!==fid)return;
+  const n=onPath?4:3;let A=byId[d.a].p3,B=byId[d.b].p3;
+  if(onPath&&ST.pathDir&&ST.pathDir[d.i]===false){const z=A;A=B;B=z}
+  const c=new THREE.Color(onPath?'#E50914':(byId[d.s].own?AUT[byId[d.s].own].color:PREC));
+  for(let j=0;j<n;j++){const ph=((t*(onPath?.35:.22))+j/n+d.i*.137)%1;
+   pp[k*3]=A.x+(B.x-A.x)*ph;pp[k*3+1]=A.y+(B.y-A.y)*ph;pp[k*3+2]=A.z+(B.z-A.z)*ph;pc[k*3]=c.r;pc[k*3+1]=c.g;pc[k*3+2]=c.b;k++}});
+ pg.setDrawRange(0,k);pg.attributes.position.needsUpdate=pg.attributes.color.needsUpdate=true;
+ if(ST.sel&&VIS[ST.sel]){const n=byId[ST.sel];selRing.visible=true;selRing.position.copy(n.p3);selRing.lookAt(camera.position);selRing.scale.setScalar(n.rad*1.9+Math.sin(t*4)*.5)}else selRing.visible=false;
+ if(tween){const u=Math.min(1,(performance.now()-tween.t0)/750),s=u*u*(3-2*u);controls.target.lerpVectors(tween.ft,tween.tt,s);camera.position.lerpVectors(tween.fp,tween.tp,s);if(u>=1)tween=null}
+ controls.update();renderer.render(scene,camera);lr.render(scene,camera);
+}
+function flyToPos(c,dist){const dir=camera.position.clone().sub(controls.target).normalize();tween={t0:performance.now(),ft:controls.target.clone(),tt:c.clone(),fp:camera.position.clone(),tp:c.clone().add(dir.multiplyScalar(dist))}}
+function flyTo(n,dist){flyToPos(n.p3,dist||({autor:340,precursor:260,obra:230,concepto:170,elemento:120,eje:260,caso:200}[n.t]))}
+function flyToSet(ids,dist=560){const c=new THREE.Vector3();let m=0;ids.forEach(id=>{const p=proxy(id);if(p){c.add(byId[p].p3);m++}});if(m){c.divideScalar(m);flyToPos(c,dist)}}
+function home(){tween={t0:performance.now(),ft:controls.target.clone(),tt:new THREE.Vector3(),fp:camera.position.clone(),tp:HOME.clone()}}
+
+/* =========================================================
+   6. INTERACCIÓN
+   ========================================================= */
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),tip=document.getElementById('tip');
+function pick(ev){const r=renderer.domElement.getBoundingClientRect();mouse.x=(ev.clientX-r.left)/r.width*2-1;mouse.y=-(ev.clientY-r.top)/r.height*2+1;
+ ray.setFromCamera(mouse,camera);const h=ray.intersectObjects(meshes,false).filter(x=>x.object.visible&&x.object.userData.n);return h.length?h[0].object.userData.n:null}
+let downAt=null;
+const cv=renderer.domElement;
+cv.addEventListener('pointermove',ev=>{const n=pick(ev),id=n?n.id:null;if(id!==ST.hover){ST.hover=id;restyle()}cv.style.cursor=n?'pointer':'grab';
+ if(n){tip.style.display='block';tip.style.left=(ev.clientX+14)+'px';tip.style.top=(ev.clientY+12)+'px';
+  const kc=KIDS[n.id].length;tip.innerHTML=`<small>${esc(typeName(n))}</small>${esc(n.n)}${kc&&!ST.exp.has(n.id)?`<em>Doble clic: expandir (${descCount(n.id)})</em>`:''}`}else tip.style.display='none'});
+cv.addEventListener('pointerdown',ev=>{downAt=[ev.clientX,ev.clientY];controls.autoRotate=false;rotBtn(false)});
+cv.addEventListener('pointerup',ev=>{if(!downAt)return;const mv=Math.hypot(ev.clientX-downAt[0],ev.clientY-downAt[1])>5;downAt=null;if(mv)return;const n=pick(ev);if(n)select(n.id,false)});
+cv.addEventListener('dblclick',ev=>{const n=pick(ev);if(n){if(KIDS[n.id].length)toggleExp(n.id);select(n.id,false)}else clearSel()});
+cv.addEventListener('pointerleave',()=>{tip.style.display='none';if(ST.hover){ST.hover=null;restyle()}});
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TN={autor:'Autor',precursor:'Precursor / complemento',obra:'Obra',concepto:'Concepto',elemento:'Elemento',eje:'Eje del perfil',caso:'Caso real'};
+function typeName(n){return (n.k||TN[n.t])+(n.own&&n.t!=='autor'?' · '+AUT[n.own].n:(n.t!=='autor'&&n.t!=='eje'&&n.t!=='caso'?' · '+rootOf(n).n:''))+(n.y?' · '+n.y:'')}
+function select(id,fly){reveal(id);ST.sel=id;ST.path=null;ST.pathE.clear();refresh();renderDetail(byId[id]);if(fly)setTimeout(()=>flyTo(byId[id]),60)}
+function clearSel(){ST.sel=null;ST.path=null;ST.pathE.clear();refresh();if(ST.guide!==null)renderGuide();else document.getElementById('detail').classList.remove('on')}
+
+/* ---------- panel de detalle ---------- */
+function ul(arr,cls){return `<ul class="${cls}">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`}
+function renderDetail(n){
+ const D=document.getElementById('detail');const col=n.t==='eje'?'#111':n.color;
+ const kids=KIDS[n.id],expd=ST.exp.has(n.id);
+ const chain=anc(n.id);
+ let h=`<div class="ph"><span>${esc(typeName(n))}</span><button class="x" data-act="close">×</button></div>`;
+ if(ST.guide!==null)h+=`<button class="back" data-act="guide">← Volver a la guía · paso ${ST.guide+1}</button>`;
+ h+=`<div class="dt">`;
+ if(chain.length)h+=`<div class="path">${chain.map(a=>`<a data-go="${a}">${esc(byId[a].n)}</a>`).join(' › ')}</div>`;
+ h+=`<h2 style="border-left:4px solid ${col};padding-left:10px">${esc(n.n)}</h2>`;
+ if(n.t==='autor')h+=`<div class="kick" style="color:${col}">${esc(AUT[n.id].full)} · ${esc(AUT[n.id].arq)}</div>`;
+ if(n.d)h+=`<p>${esc(n.d)}</p>`;
+ if(n.ctx)h+=`<p class="ctx"><b>Qué pasó:</b> ${esc(n.ctx)}</p>`;
+ if(n.f)h+=`<blockquote style="border-color:${col}">${esc(n.f)}<small>Idea en una frase · paráfrasis</small></blockquote>`;
+ if(n.i)h+=`<div class="sec"><h5>Ideas clave</h5>${ul(n.i,'li-i')}</div>`;
+ if(n.r)h+=`<div class="sec"><h5>Cómo aplicarlo</h5>${ul(n.r,'li-r')}</div>`;
+ if(n.x)h+=`<div class="sec"><h5>Errores a evitar</h5>${ul(n.x,'li-x')}</div>`;
+ const acts=[];
+ if(kids.length)acts.push(`<button class="act pri" data-act="exp">${expd?'− Contraer':'＋ Expandir'} (${descCount(n.id)})</button>`);
+ if(kids.length||n.t==='caso'||n.t==='eje')acts.push(`<button class="act" data-act="enter">◎ Entrar en esta red</button>`);
+ if(acts.length)h+=`<div class="acts">${acts.join('')}</div>`;
+ if(n.ax)h+=`<div class="chips">${n.ax.map(a=>`<button class="chip" data-go="ax_${a}">◇ ${AXES[a].n}</button>`).join('')}</div>`;
+ if(GSTEP[n.id])h+=`<div class="chips">${[...GSTEP[n.id]].sort((a,b)=>a-b).map(i=>`<button class="chip g" data-step="${i}">★ Guía: ${esc(GUIDE[i].n)}</button>`).join('')}</div>`;
+ if(kids.length){h+=`<div class="sec"><h5>Contiene · ${kids.length}</h5>`;
+  kids.forEach(k=>{const c=byId[k];h+=`<div class="cn" data-go="${k}"><span class="dot" style="background:${c.color}"></span><div>${esc(c.n)}${KIDS[k].length?` <em class="cnt">＋${descCount(k)}</em>`:''}${c.d&&c.t==='elemento'?`<small>${esc(c.d)}</small>`:c.k?`<small>${esc(c.k)}</small>`:''}</div></div>`});h+='</div>'}
+ const groups={},refs=new Set(n.src?[n.src]:[]);
+ ADJ[n.id].forEach(e=>{if(e.k==='arbol')return;const out=e.s===n.id,o=byId[out?e.t:e.s];
+  const g=e.k==='influye'?(out?'Influye en':'Recibe influencia de'):e.k==='eje'?(out?'Ejes del perfil':'Conceptos de este eje'):(out?(o.t==='autor'||o.t==='precursor'?'Autor protagonista':'Lecciones (conceptos)'):'Casos que lo ilustran');
+  if(e.k==='eje'&&out)return;
+  (groups[g]=groups[g]||[]).push({e,o});e.refs.forEach(r=>refs.add(r))});
+ ['Influye en','Recibe influencia de','Autor protagonista','Lecciones (conceptos)','Casos que lo ilustran','Conceptos de este eje'].forEach(g=>{if(!groups[g])return;
+  h+=`<div class="sec"><h5>${g} · ${groups[g].length}</h5>`;
+  groups[g].sort((a,b)=>a.o.n.localeCompare(b.o.n)).forEach(({e,o})=>{h+=`<div class="cn" data-go="${o.id}"><span class="dot" style="background:${o.color}"></span><div>${esc(o.n)}${e.k!=='eje'?`<span class="ev ${e.ev}">${e.ev==='doc'?'DOC':'CONC'}</span>`:''}${e.k==='influye'?`<small>${esc(e.rel)}</small>`:`<small>${esc(typeName(o))}</small>`}</div></div>`});h+='</div>'});
+ const rl=[...refs].filter(r=>REF[r]);
+ if(rl.length)h+=`<div class="sec"><h5>Fuentes · ${rl.length}</h5>${rl.map(r=>REF[r].u?`<a class="ref" href="${REF[r].u}" target="_blank" rel="noopener">${esc(REF[r].t)} ↗</a>`:`<span class="ref nolink">📖 ${esc(REF[r].t)}</span>`).join('')}</div>`;
+ h+='</div>';D.innerHTML=h;D.classList.add('on');D.scrollTop=0;
+ D.querySelectorAll('[data-go]').forEach(el=>el.onclick=()=>select(el.dataset.go,true));
+ D.querySelectorAll('[data-step]').forEach(el=>el.onclick=()=>openGuide(+el.dataset.step));
+ D.querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{const a=el.dataset.act;
+  if(a==='close'){ST.sel=null;refresh();if(ST.guide!==null)renderGuide();else D.classList.remove('on')}
+  if(a==='guide'){ST.sel=null;refresh();renderGuide()}
+  if(a==='exp'){toggleExp(n.id);renderDetail(n);setTimeout(()=>flyTo(n,ST.exp.has(n.id)?Math.min(140+descCount(n.id)*9,520):undefined),120)}
+  if(a==='enter')enterRoot(n.id)});
+}
+
+/* ---------- guía ---------- */
+function openGuide(i){
+ if(ST.root)exitRoot(false);if(ST.mode!=='red')setMode('red',false);
+ ST.guide=i;ST.sel=null;ST.path=null;ST.pathE.clear();
+ const g=GUIDE[i];g.nodes.concat(g.rec.map(r=>r[0])).forEach(reveal);
+ if(g.casos.length){ST.typeOn.caso=true;document.getElementById('t_caso').checked=true}
+ refresh();kick(.5);renderGuide();document.getElementById('bGuide').classList.add('on');
+ setTimeout(()=>flyToSet(g.nodes.concat(g.casos),620),450);
+}
+function closeGuide(){ST.guide=null;document.getElementById('bGuide').classList.remove('on');document.getElementById('detail').classList.remove('on');refresh();home()}
+function renderGuide(){
+ const i=ST.guide,g=GUIDE[i],D=document.getElementById('detail');
+ let h=`<div class="ph"><span>Guía del proyecto · paso ${i+1} de ${GUIDE.length}</span><button class="x" data-ga="close">×</button></div><div class="steps">${GUIDE.map((s,j)=>`<button class="${j===i?'on':''}" data-gs="${j}" title="${esc(s.n)}">${j+1}</button>`).join('')}</div><div class="dt">`;
+ h+=`<h2>${esc(g.n)}</h2><p class="obj">${esc(g.obj)}</p>`;
+ h+=`<div class="sec"><h5>Preguntas clave</h5>${ul(g.q,'li-q')}</div>`;
+ h+=`<div class="sec"><h5>Recomendaciones de los autores</h5>${g.rec.map(([id,t])=>{const n=byId[id];const a=n.own?AUT[n.own].n:rootOf(n).n;return `<div class="cn rec" data-go="${id}"><span class="dot" style="background:${n.color}"></span><div><b>${esc(a)} · ${esc(n.n)}</b><small>${esc(t)}</small></div></div>`}).join('')}</div>`;
+ h+=`<div class="sec"><h5>Errores a evitar</h5>${ul(g.ev,'li-x')}</div>`;
+ h+=`<div class="sec"><h5>Artefactos</h5><div class="chips">${g.art.map(a=>`<span class="chip static">▤ ${esc(a)}</span>`).join('')}</div></div>`;
+ if(g.casos.length)h+=`<div class="sec"><h5>Casos para discutir</h5>${g.casos.map(c=>{const n=byId[c];return `<div class="cn" data-go="${c}"><span class="dot" style="background:${n.color}"></span><div><b>${esc(n.n)} · ${n.y}</b><small>${esc(n.d)}</small></div></div>`}).join('')}</div>`;
+ h+=`<div class="gnav"><button class="act" data-ga="prev" ${i===0?'disabled':''}>← Anterior</button><button class="act pri" data-ga="next" ${i===GUIDE.length-1?'disabled':''}>Siguiente →</button></div></div>`;
+ D.innerHTML=h;D.classList.add('on');D.scrollTop=0;
+ D.querySelectorAll('[data-go]').forEach(el=>el.onclick=()=>select(el.dataset.go,true));
+ D.querySelectorAll('[data-gs]').forEach(el=>el.onclick=()=>openGuide(+el.dataset.gs));
+ D.querySelectorAll('[data-ga]').forEach(el=>el.onclick=()=>{const a=el.dataset.ga;if(a==='close')closeGuide();if(a==='prev')openGuide(i-1);if(a==='next')openGuide(i+1)});
+}
+
+/* ---------- ruta ---------- */
+function shortest(a,b){/* Dijkstra: enlaces documentados pesan 1, conceptuales 1.6 */
+ const dist={[a]:0},prev={[a]:null},done=new Set();
+ while(true){let x=null,bd=Infinity;for(const k in dist)if(!done.has(k)&&dist[k]<bd){bd=dist[k];x=k}
+  if(x===null||x===b)break;done.add(x);
+  for(const e of ADJ[x]){if(e.k==='eje')continue;const y=e.s===x?e.t:e.s;if(done.has(y))continue;if(byId[y].t==='caso'&&y!==b)continue;
+   const w=bd+(e.ev==='conc'?1.6:1);if(!(y in dist)||w<dist[y]){dist[y]=w;prev[y]={x,e}}}}
+ if(!(b in prev))return null;const nodes=[],edges=[];let c=b;while(c!==null){nodes.unshift(c);const p=prev[c];if(!p)break;edges.unshift(p.e);c=p.x}return{nodes,edges}}
+function tracePath(){const a=document.getElementById('pA').value,b=document.getElementById('pB').value;if(!a||!b||a===b)return;
+ if(ST.root)exitRoot(false);if(ST.guide!==null){ST.guide=null;document.getElementById('bGuide').classList.remove('on')}
+ const r=shortest(a,b),D=document.getElementById('detail');
+ if(!r){D.innerHTML=`<div class="ph"><span>Ruta</span><button class="x" id="dx">×</button></div><div class="dt"><p>No hay ruta entre estos nodos.</p></div>`;D.classList.add('on');D.querySelector('#dx').onclick=clearSel;return}
+ if(ST.mode==='infl')setMode('red',false);
+ r.nodes.forEach(reveal);ST.sel=null;ST.path=r.nodes;ST.pathE=new Set(r.edges.map(e=>e.i));ST.pathDir={};r.edges.forEach((e,j)=>ST.pathDir[e.i]=e.s===r.nodes[j]);
+ refresh();kick(.4);
+ let h=`<div class="ph"><span>Ruta · ${r.edges.length} saltos</span><button class="x" id="dx">×</button></div><div class="dt"><h2 style="font-size:17px">${esc(byId[a].n)} → ${esc(byId[b].n)}</h2>`;
+ r.nodes.forEach((id,j)=>{const n=byId[id];h+=`<div class="cn" data-go="${id}"><span class="dot" style="background:${n.color}"></span><div><b>${esc(n.n)}</b><small>${esc(typeName(n))}</small></div></div>`;
+  if(j<r.edges.length){const e=r.edges[j];const ref=e.refs.find(x=>REF[x]&&REF[x].u);h+=`<div class="hop">${esc(e.k==='arbol'?(e.s===id?'contiene':'es parte de'):e.rel)} <span class="ev ${e.ev}">${e.ev==='doc'?'DOC':'CONC'}</span>${ref?` · <a href="${REF[ref].u}" target="_blank" rel="noopener">fuente</a>`:''}</div>`}});
+ D.innerHTML=h+'</div>';D.classList.add('on');D.querySelector('#dx').onclick=clearSel;D.querySelectorAll('.cn[data-go]').forEach(el=>el.onclick=()=>select(el.dataset.go,true));
+ setTimeout(()=>flyToSet(r.nodes,560),500);
+}
+
+/* =========================================================
+   7. UI
+   ========================================================= */
+const TYPES=[['autor','Autores','●'],['precursor','Precursores / complementos','●'],['obra','Obras','◆'],['concepto','Conceptos','●'],['elemento','Elementos (detalle)','·'],['eje','Ejes (perfil)','◇'],['caso','Casos reales','■']];
+function stats(){const c=t=>NODES.filter(n=>n.t===t).length;
+ const S=[['Autores',c('autor'),'#E50914'],['Obras',c('obra')],['Conceptos',c('concepto')],['Elementos',c('elemento')],['Enlaces',ALL.filter(e=>e.k!=='eje').length],['Fuentes',Object.keys(REF).length],['Fases guía',GUIDE.length]];
+ document.getElementById('stats').innerHTML=S.map(s=>`<div class="stat"><b style="color:${s[2]||'#0f172a'}">${s[1]}</b><span>${s[0]}</span></div>`).join('')}
+function syncAut(){document.querySelectorAll('#lgAut input').forEach(i=>i.checked=ST.autOn[i.dataset.a])}
+function legend(){
+ const la=document.getElementById('lgAut');
+ la.innerHTML=Object.keys(AUT).map(k=>`<label class="row"><input type="checkbox" data-a="${k}" checked><span class="dot" style="background:${AUT[k].color}"></span>${AUT[k].n}<em>${NODES.filter(n=>n.own===k&&n.t!=='autor').length}</em><button class="mini" data-enter="${k}" title="Entrar">◎</button></label>`).join('');
+ la.querySelectorAll('input').forEach(i=>i.onchange=()=>{ST.autOn[i.dataset.a]=i.checked;refresh();kick(.3)});
+ la.querySelectorAll('[data-enter]').forEach(b=>b.onclick=ev=>{ev.preventDefault();enterRoot(b.dataset.enter)});
+ document.getElementById('lgType').innerHTML=TYPES.map(([t,n,s])=>`<label class="row"><input type="checkbox" id="t_${t}" ${ST.typeOn[t]?'checked':''}><span class="sh">${s}</span>${n}<em>${NODES.filter(x=>x.t===t).length}</em></label>`).join('');
+ TYPES.forEach(([t])=>document.getElementById('t_'+t).onchange=ev=>{ST.typeOn[t]=ev.target.checked;refresh();kick(.3)});
+ document.getElementById('nodelist').innerHTML=NODES.map(n=>`<option value="${esc(n.n)}">${esc(typeName(n))}</option>`).join('');
+ const opts='<option value="">—</option>'+[...NODES].filter(n=>n.t!=='eje').sort((a,b)=>a.n.localeCompare(b.n)).map(n=>`<option value="${n.id}">${esc(n.n)}</option>`).join('');
+ pA.innerHTML=opts;pB.innerHTML=opts;pA.value='brooks';pB.value='cohn';
+}
+const pA=document.getElementById('pA'),pB=document.getElementById('pB');
+document.getElementById('search').addEventListener('change',ev=>{const v=ev.target.value.trim().toLowerCase();if(!v)return;const n=NODES.find(x=>x.n.toLowerCase()===v)||NODES.find(x=>x.n.toLowerCase().includes(v));if(n){select(n.id,true);ev.target.value=''}});
+document.getElementById('fDoc').onchange=e=>{ST.doc=e.target.checked;refresh()};
+document.getElementById('fConc').onchange=e=>{ST.conc=e.target.checked;refresh()};
+document.getElementById('fEje').onchange=e=>{ST.eje=e.target.checked;refresh();kick(.4)};
+document.getElementById('fLbl').onchange=e=>{ST.allLbl=e.target.checked;restyle()};
+document.querySelectorAll('#lvl button').forEach(b=>b.onclick=()=>{if(ST.root)exitRoot(false);setLevel(+b.dataset.l)});
+function setMode(m,fly=true){ST.mode=m;document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));ST.path=null;ST.pathE.clear();if(ST.root){ST.root=null;ST.scope=null;ST.ext.clear();crumbs()}applyMode();if(fly){ST.sel=null;if(ST.guide===null)document.getElementById('detail').classList.remove('on');home()}}
+document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+document.getElementById('pGo').onclick=tracePath;
+document.getElementById('bGuide').onclick=()=>{if(ST.guide!==null)closeGuide();else openGuide(0)};
+const rotBtn=on=>document.getElementById('bRot').classList.toggle('on',on);
+document.getElementById('bRot').onclick=()=>{controls.autoRotate=!controls.autoRotate;rotBtn(controls.autoRotate)};
+document.getElementById('bReset').onclick=()=>{if(ST.root)exitRoot(false);ST.guide=null;document.getElementById('bGuide').classList.remove('on');clearSel();document.getElementById('detail').classList.remove('on');home()};
+document.getElementById('legendToggle').onclick=()=>document.getElementById('legend').classList.toggle('on');
+document.getElementById('bSrc').onclick=()=>{
+ const used={};ALL.forEach(e=>e.refs.forEach(r=>used[r]=(used[r]||0)+1));NODES.forEach(n=>{if(n.ref)used[n.ref]=(used[n.ref]||0)+1});
+ const keys=Object.keys(REF).sort((a,b)=>(used[b]||0)-(used[a]||0));
+ document.getElementById('mbox').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:start"><div><h3>Fuentes y referencias · ${keys.length}</h3><p class="mnote">Cada enlace transversal está marcado como <span class="ev doc">DOC</span> (respaldado por una fuente que lo afirma) o <span class="ev conc">CONC</span> (vínculo conceptual propuesto con fines pedagógicos). Las frases de los autores son paráfrasis, no citas textuales. 📖 = referencia bibliográfica impresa.</p></div><button class="x" id="mx">×</button></div>`+
+ keys.map(k=>`<div class="ri"><b>${used[k]||0}</b><div>${REF[k].u?`<a href="${REF[k].u}" target="_blank" rel="noopener">${esc(REF[k].t)} ↗</a>`:'📖 '+esc(REF[k].t)}<small>${REF[k].u?esc(REF[k].u):'Libro impreso'}</small></div></div>`).join('');
+ document.getElementById('modal').classList.add('on');document.getElementById('mx').onclick=()=>document.getElementById('modal').classList.remove('on')};
+document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')e.target.classList.remove('on')};
+document.getElementById('bHelp').onclick=()=>{document.getElementById('mbox').innerHTML=document.getElementById('helpTpl').innerHTML;document.getElementById('modal').classList.add('on');document.getElementById('mx').onclick=()=>document.getElementById('modal').classList.remove('on')};
+addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('modal').classList.remove('on');if(ST.root)exitRoot();else clearSel()}});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);lr.setSize(innerWidth,innerHeight)});
+
+stats();legend();applyMode(false);setLevel(2);
+for(let i=0;i<300;i++)simulate();alpha=.3;
+frame();
+window.__net={ST,NODES,ALL,enterRoot,openGuide,toggleExp,select};
+
+</script>
+</body>
+</html>
